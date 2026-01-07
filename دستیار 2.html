@@ -1,0 +1,3160 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hero Craft - دستیار هوشمند ماین‌کرافت</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.3/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-dark: #0f172a;
+            --primary-blue: #3b82f6;
+            --mc-green: #22c55e;
+            --mc-red: #ef4444;
+            --mc-gold: #fbbf24;
+            --mc-diamond: #06b6d4;
+            --mc-netherite: #4A1E1E;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            font-family: 'Vazirmatn', 'Segoe UI', sans-serif;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .hero-gradient {
+            background: linear-gradient(135deg, 
+                rgba(30, 41, 59, 0.9) 0%,
+                rgba(15, 23, 42, 0.95) 100%);
+        }
+        
+        .chat-container {
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+        
+        .message-bubble {
+            animation: messageAppear 0.3s ease-out;
+            max-width: 85%;
+            word-wrap: break-word;
+        }
+        
+        @keyframes messageAppear {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .user-bubble {
+            background: linear-gradient(135deg, var(--primary-blue), #1d4ed8);
+            border-radius: 18px 18px 4px 18px;
+            margin-left: auto;
+        }
+        
+        .bot-bubble {
+            background: linear-gradient(135deg, #334155, #475569);
+            border-radius: 18px 18px 18px 4px;
+            border-right: 4px solid var(--mc-diamond);
+        }
+        
+        .typing-indicator span {
+            animation: bounce 1.4s infinite ease-in-out both;
+            background-color: var(--mc-diamond);
+        }
+        
+        .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+        .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+        
+        @keyframes bounce {
+            0%, 80%, 100% { 
+                transform: scale(0.8);
+                opacity: 0.5;
+            }
+            40% { 
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        
+        .glow-effect {
+            box-shadow: 0 0 20px rgba(6, 182, 212, 0.3);
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(6, 182, 212, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(6, 182, 212, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(6, 182, 212, 0); }
+        }
+        
+        .scrollbar-thin {
+            scrollbar-width: thin;
+            scrollbar-color: var(--mc-diamond) #1e293b;
+        }
+        
+        .scrollbar-thin::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .scrollbar-thin::-webkit-scrollbar-track {
+            background: #1e293b;
+            border-radius: 10px;
+        }
+        
+        .scrollbar-thin::-webkit-scrollbar-thumb {
+            background: var(--mc-diamond);
+            border-radius: 10px;
+        }
+        
+        .quick-action-btn {
+            transition: all 0.2s ease;
+        }
+        
+        .quick-action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .mc-grid {
+            background-image: 
+                linear-gradient(rgba(59, 130, 246, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(59, 130, 246, 0.1) 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
+        
+        .floating {
+            animation: floating 3s ease-in-out infinite;
+        }
+        
+        @keyframes floating {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        /* استایل‌های جدید */
+        .player-status-bar {
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid var(--mc-diamond);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 50;
+            padding: 8px 16px;
+        }
+        
+        .xp-bar {
+            height: 8px;
+            background: linear-gradient(90deg, #3b82f6, #06b6d4);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+        
+        .achievement-badge {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: #78350f;
+            border-radius: 12px;
+            padding: 4px 10px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .modal-content {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            border: 2px solid var(--mc-diamond);
+            border-radius: 20px;
+            animation: modalAppear 0.3s ease-out;
+            max-width: 500px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        @keyframes modalAppear {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+        
+        .speedrun-mode {
+            border: 2px solid #ef4444;
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), transparent);
+        }
+        
+        .tutor-step {
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), transparent);
+            border-right: 4px solid var(--mc-green);
+        }
+        
+        .calculator-input {
+            direction: ltr;
+            text-align: left;
+        }
+        
+        .level-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .level-noob { background: #ef4444; }
+        .level-beginner { background: #f59e0b; }
+        .level-intermediate { background: #06b6d4; }
+        .level-pro { background: #8b5cf6; }
+        .level-master { background: linear-gradient(135deg, #fbbf24, #ef4444); }
+        
+        .video-suggestion {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), transparent);
+            border-right: 3px solid #8b5cf6;
+        }
+        
+        .challenge-badge {
+            background: linear-gradient(135deg, #ec4899, #8b5cf6);
+            animation: pulse 2s infinite;
+        }
+        
+        .suggested-question {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 10px;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        
+        .suggested-question:hover {
+            background: rgba(59, 130, 246, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .mode-indicator {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            z-index: 10;
+        }
+        
+        .mode-normal { background: var(--mc-diamond); }
+        .mode-speedrun { background: var(--mc-red); }
+        .mode-tutor { background: var(--mc-green); }
+        .mode-redstone { background: #dc2626; }
+
+        /* استایل‌های رفع باگ */
+        .profile-btn {
+            border: 2px solid #374151;
+            transition: all 0.2s;
+            background: rgba(30, 41, 59, 0.5);
+        }
+        
+        .profile-btn:hover {
+            border-color: currentColor;
+            transform: translateY(-2px);
+        }
+        
+        .profile-btn.selected {
+            border-color: currentColor !important;
+            background: rgba(30, 41, 59, 0.8);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+        }
+        
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            z-index: 1001;
+            animation: slideIn 0.3s ease-out;
+            max-width: 300px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .toast-success {
+            background: linear-gradient(135deg, #059669, #10b981);
+            color: white;
+        }
+        
+        .toast-error {
+            background: linear-gradient(135deg, #dc2626, #ef4444);
+            color: white;
+        }
+        
+        .toast-warning {
+            background: linear-gradient(135deg, #d97706, #f59e0b);
+            color: white;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateY(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .saving-indicator {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(30, 41, 59, 0.9);
+            border: 1px solid var(--mc-diamond);
+            border-radius: 20px;
+            padding: 6px 12px;
+            font-size: 12px;
+            z-index: 1001;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .profile-input {
+            background: rgba(30, 41, 59, 0.8);
+            border: 2px solid #374151;
+            border-radius: 10px;
+            padding: 12px 16px;
+            color: white;
+            font-family: inherit;
+            transition: all 0.3s;
+            width: 100%;
+        }
+        
+        .profile-input:focus {
+            outline: none;
+            border-color: var(--mc-diamond);
+            box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.1);
+        }
+        
+        /* رفع باگ مودال‌ها */
+        .modal-overlay.active {
+            display: flex;
+        }
+        /* ثابت ماندن ارتفاع چت و فعال شدن اسکرول */
+#chatbox {
+    max-height: 400px;      /* ارتفاع ثابت باکس پیام‌ها */
+    overflow-y: auto;       /* اسکرول عمودی */
+    overflow-x: hidden;     /* جلوگیری از اسکرول افقی */
+}
+    </style>
+</head>
+<body class="text-white mc-grid">
+    <!-- Floating Icons -->
+    <div class="fixed top-4 left-4 text-3xl floating opacity-20">⛏️</div>
+    <div class="fixed top-10 right-10 text-2xl floating opacity-20" style="animation-delay: 0.5s">🧱</div>
+    <div class="fixed bottom-20 left-20 text-3xl floating opacity-20" style="animation-delay: 1s">💎</div>
+    <div class="fixed bottom-10 right-20 text-2xl floating opacity-20" style="animation-delay: 1.5s">⚔️</div>
+    
+    <!-- Player Status Bar -->
+    <div class="player-status-bar hidden md:block">
+        <div class="max-w-4xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <div class="flex items-center gap-2">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 flex items-center justify-center cursor-pointer" onclick="openProfileModal()">
+                        <i class="fas fa-user text-lg"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span id="playerName">بازدیدکننده</span>
+                            <span id="playerLevel" class="level-badge level-noob">Noob</span>
+                        </div>
+                        <div class="text-xs text-gray-400">
+                            XP: <span id="playerXP">0</span>/<span id="playerMaxXP">100</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="w-32">
+                    <div class="xp-bar" id="xpBar" style="width: 0%"></div>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <div class="text-center">
+                    <div class="text-sm">چالش روزانه</div>
+                    <div id="dailyChallenge" class="text-xs text-cyan-300">۳ شب زنده بمان</div>
+                </div>
+                <div class="flex gap-1">
+                    <div class="achievement-badge" title="اولین سوال" id="firstQuestionBadge">🎯</div>
+                    <div class="achievement-badge hidden" title="پرسشگر حرفه‌ای" id="proBadge">💎</div>
+                </div>
+                <button id="shareLinkBtn" class="text-xs px-3 py-1 bg-blue-600 rounded-lg hover:bg-blue-700">
+                    <i class="fas fa-link mr-1"></i> ذخیره لینک
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container mx-auto px-4 py-6 max-w-4xl pt-20 md:pt-6">
+        <!-- Header -->
+        <header class="hero-gradient rounded-2xl p-6 mb-6 glow-effect relative">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-4">
+                    <div class="text-4xl pulse-animation">🤖</div>
+                    <div>
+                        <h1 class="text-3xl font-bold" style="color: var(--mc-diamond)">Hero Craft AI</h1>
+                        <p class="text-gray-300">دستیار تخصصی ماین‌کرافت</p>
+                    </div>
+                </div>
+                
+                <div class="flex flex-col md:flex-row items-center gap-4">
+                    <!-- Mode Selector -->
+                    <div class="flex gap-2">
+                        <button onclick="setMode('normal')" id="modeNormal" class="px-3 py-1 rounded-lg bg-blue-600 text-sm font-bold">عادی</button>
+                        <button onclick="setMode('speedrun')" id="modeSpeedrun" class="px-3 py-1 rounded-lg bg-gray-700 hover:bg-gray-600 text-sm">اسپیدران</button>
+                        <button onclick="startTutorial()" id="modeTutor" class="px-3 py-1 rounded-lg bg-gray-700 hover:bg-gray-600 text-sm">آموزش</button>
+                    </div>
+                    
+                    <div class="text-center">
+                        <div class="inline-flex items-center gap-2 bg-gray-800 px-4 py-2 rounded-full">
+                            <span class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></span>
+                            <span class="text-sm">آنلاین</span>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-2">کانال هیروکرفت آپارات</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Mode Indicator -->
+            <div id="modeIndicator" class="mode-indicator mode-normal hidden md:flex">حالت عادی</div>
+            
+            <!-- Save Button -->
+            <button onclick="showSaveNotification()" class="absolute top-4 left-4 md:static md:mt-2 px-3 py-1 rounded-lg bg-green-600 hover:bg-green-700 text-sm flex items-center gap-2">
+                <i class="fas fa-save"></i> ذخیره
+            </button>
+        </header>
+
+        <!-- Quick Actions & Tools -->
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
+            <button onclick="askQuickQuestion('چطوری الماس پیدا کنم؟')" 
+                    class="quick-action-btn bg-gray-800 hover:bg-gray-700 p-3 rounded-xl flex flex-col items-center justify-center gap-2">
+                <span class="text-2xl">💎</span>
+                <span class="text-sm">الماس</span>
+            </button>
+            <button onclick="askQuickQuestion('بهترین راه دفاع در شب چیست؟')" 
+                    class="quick-action-btn bg-gray-800 hover:bg-gray-700 p-3 rounded-xl flex flex-col items-center justify-center gap-2">
+                <span class="text-2xl">⚔️</span>
+                <span class="text-sm">دفاع</span>
+            </button>
+            <button onclick="openCalculator()" 
+                    class="quick-action-btn bg-gray-800 hover:bg-gray-700 p-3 rounded-xl flex flex-col items-center justify-center gap-2">
+                <span class="text-2xl">🧮</span>
+                <span class="text-sm">ماشین حساب</span>
+            </button>
+            <button onclick="askQuickQuestion('چطور پورتال ندر بسازم؟')" 
+                    class="quick-action-btn bg-gray-800 hover:bg-gray-700 p-3 rounded-xl flex flex-col items-center justify-center gap-2">
+                <span class="text-2xl">🔥</span>
+                <span class="text-sm">ندر</span>
+            </button>
+            <button onclick="askQuickQuestion('چطور اندر دراگون را شکست دهم؟')" 
+                    class="quick-action-btn bg-gray-800 hover:bg-gray-700 p-3 rounded-xl flex flex-col items-center justify-center gap-2">
+                <span class="text-2xl">🐉</span>
+                <span class="text-sm">اِندر دراگون</span>
+            </button>
+        </div>
+
+        <!-- Suggested Questions -->
+        <div id="suggestedQuestions" class="mb-6 grid grid-cols-1 md:grid-cols-3 gap-2">
+            <!-- Will be populated by JavaScript -->
+        </div>
+
+        <!-- Chat Container -->
+        <div id="chatContainer" class="chat-container rounded-2xl overflow-hidden mb-6">
+            <div class="p-4 border-b border-gray-700">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                        <h2 class="font-bold">چت با هیرو</h2>
+                        <span id="currentMode" class="text-xs text-cyan-300">حالت عادی</span>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="showVideoSuggestions()" class="text-sm text-gray-400 hover:text-white">
+                            <i class="fas fa-video"></i> ویدیو
+                        </button>
+                        <button onclick="clearChat()" class="text-sm text-gray-400 hover:text-white">
+                            <i class="fas fa-trash"></i> پاک کردن
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Chat Messages -->
+            <div id="chatbox" class="h-[400px] overflow-y-auto p-4 flex flex-col gap-3 scrollbar-thin">
+                <!-- Initial Message -->
+                <div class="message-bubble bot-bubble p-4 self-start">
+                    <div class="flex items-center gap-2 mb-2">
+                        <div class="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center">
+                            <i class="fas fa-robot text-xs"></i>
+                        </div>
+                        <span class="font-bold">هیرو</span>
+                    </div>
+                    <p>سلام! من هیرو هستم، دستیار هوشمند ماین‌کرافت. 🤖</p>
+                    <p class="mt-2 text-gray-300">می‌تونم در مورد هر چیزی در ماین‌کرافت کمکت کنم: از پیدا کردن الماس تا شکست دادن اندر دراگون!</p>
+                    <div class="mt-3 text-sm text-blue-300">
+                        <i class="fas fa-lightbulb"></i> پروفایل خود را تنظیم کنید تا پاسخ‌های شخصی‌سازی شده دریافت کنید!
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tutor Steps -->
+            <div id="tutorSteps" class="hidden border-t border-gray-700">
+                <div class="p-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-2">
+                            <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                            <h3 class="font-bold">آموزش گام‌به‌گام بقا</h3>
+                        </div>
+                        <button onclick="exitTutorial()" class="text-sm text-gray-400 hover:text-white">
+                            <i class="fas fa-times"></i> خروج
+                        </button>
+                    </div>
+                    <div id="currentStep" class="tutor-step p-3 rounded-lg">
+                        <!-- Tutor steps will be loaded here -->
+                    </div>
+                    <div class="flex justify-between mt-3">
+                        <button onclick="prevStep()" class="px-4 py-2 bg-gray-700 rounded-lg hover:bg-gray-600">
+                            <i class="fas fa-arrow-right"></i> قبلی
+                        </button>
+                        <div class="text-sm text-gray-400" id="stepProgress">گام 1 از 10</div>
+                        <button onclick="nextStep()" class="px-4 py-2 bg-green-600 rounded-lg hover:bg-green-700">
+                            بعدی <i class="fas fa-arrow-left"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Typing Indicator -->
+            <div id="typingIndicator" class="hidden p-4 border-t border-gray-700">
+                <div class="flex items-center gap-2">
+                    <div class="typing-indicator flex gap-1">
+                        <span class="w-2 h-2 rounded-full"></span>
+                        <span class="w-2 h-2 rounded-full"></span>
+                        <span class="w-2 h-2 rounded-full"></span>
+                    </div>
+                    <span class="text-sm text-gray-400">هیرو در حال تایپ است...</span>
+                </div>
+            </div>
+            
+            <!-- Input Area -->
+            <div class="p-4 border-t border-gray-700">
+                <div class="flex gap-2">
+                    <input type="text" 
+                           id="messageInput"
+                           placeholder="سوال خود را اینجا بنویسید..."
+                           class="flex-1 bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+                           dir="rtl">
+                    <button id="sendButton" 
+                            onclick="sendMessage()"
+                            class="bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 px-6 rounded-xl font-bold transition-all duration-200 flex items-center gap-2">
+                        <span>ارسال</span>
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+                <div class="mt-3 text-xs text-gray-500 text-center">
+                    <i class="fas fa-lightbulb mr-1"></i>
+                    می‌توانید روی دکمه‌های بالا کلیک کنید یا سوال خود را تایپ کنید
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="grid grid-cols-4 gap-4 text-center">
+            <div class="bg-gray-800 bg-opacity-50 p-3 rounded-xl">
+                <div class="text-2xl font-bold" style="color: var(--mc-diamond)"><span id="statTopics">300</span>+</div>
+                <div class="text-sm text-gray-400">موضوع پوشش داده شده</div>
+            </div>
+            <div class="bg-gray-800 bg-opacity-50 p-3 rounded-xl">
+                <div class="text-2xl font-bold" style="color: var(--mc-green)"><span id="statQuestions">1</span></div>
+                <div class="text-sm text-gray-400">سوالات شما</div>
+            </div>
+            <div class="bg-gray-800 bg-opacity-50 p-3 rounded-xl">
+                <div class="text-2xl font-bold" style="color: var(--mc-gold)">24/7</div>
+                <div class="text-sm text-gray-400">پاسخگویی</div>
+            </div>
+            <div class="bg-gray-800 bg-opacity-50 p-3 rounded-xl">
+                <div class="text-2xl font-bold" style="color: var(--mc-netherite)"><span id="playerRank">1</span></div>
+                <div class="text-sm text-gray-400">رتبه شما</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Modal -->
+    <div id="profileModal" class="modal-overlay">
+        <div class="modal-content p-6 m-4">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-cyan-300">پروفایل ماین‌کرافت شما</h3>
+                <button onclick="closeProfileModal()" class="text-gray-400 hover:text-white text-xl">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="space-y-6">
+                <div>
+                    <label class="block text-sm mb-2 text-gray-300">نام شما</label>
+                    <input type="text" id="profileName" 
+                           class="profile-input"
+                           placeholder="نام خود را وارد کنید">
+                </div>
+                
+                <div>
+                    <label class="block text-sm mb-2 text-gray-300">ورژن بازی</label>
+                    <div class="flex gap-2">
+                        <button type="button" onclick="selectVersion('java')" id="btnJava" 
+                                class="flex-1 py-3 rounded-lg profile-btn border-gray-700 hover:border-blue-500 text-blue-400">
+                            <div class="font-medium">Java Edition</div>
+                            <div class="text-xs text-gray-400 mt-1">PC, Mac, Linux</div>
+                        </button>
+                        <button type="button" onclick="selectVersion('bedrock')" id="btnBedrock"
+                                class="flex-1 py-3 rounded-lg profile-btn border-gray-700 hover:border-blue-500 text-blue-400">
+                            <div class="font-medium">Bedrock Edition</div>
+                            <div class="text-xs text-gray-400 mt-1">موبایل، کنسول</div>
+                        </button>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm mb-2 text-gray-300">سطح مهارت</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button type="button" onclick="selectLevel('noob')" id="btnNoob" 
+                                class="py-3 rounded-lg profile-btn border-gray-700 hover:border-red-500 text-red-400">
+                            <div class="font-medium">تازه‌کار</div>
+                            <div class="text-xs text-gray-400 mt-1">اولین بار</div>
+                        </button>
+                        <button type="button" onclick="selectLevel('intermediate')" id="btnIntermediate"
+                                class="py-3 rounded-lg profile-btn border-gray-700 hover:border-blue-500 text-blue-400">
+                            <div class="font-medium">متوسط</div>
+                            <div class="text-xs text-gray-400 mt-1">آشنایی دارم</div>
+                        </button>
+                        <button type="button" onclick="selectLevel('pro')" id="btnPro"
+                                class="py-3 rounded-lg profile-btn border-gray-700 hover:border-green-500 text-green-400">
+                            <div class="font-medium">حرفه‌ای</div>
+                            <div class="text-xs text-gray-400 mt-1">تجربه بالا</div>
+                        </button>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm mb-2 text-gray-300">سبک بازی</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button type="button" onclick="selectStyle('survival')" id="btnSurvival"
+                                class="py-3 rounded-lg profile-btn border-gray-700 hover:border-green-500 text-green-400">
+                            <div class="font-medium">بقا</div>
+                            <div class="text-xs text-gray-400 mt-1">زنده ماندن</div>
+                        </button>
+                        <button type="button" onclick="selectStyle('builder')" id="btnBuilder"
+                                class="py-3 rounded-lg profile-btn border-gray-700 hover:border-yellow-500 text-yellow-400">
+                            <div class="font-medium">ساختمان</div>
+                            <div class="text-xs text-gray-400 mt-1">خلاقیت</div>
+                        </button>
+                        <button type="button" onclick="selectStyle('redstone')" id="btnRedstone"
+                                class="py-3 rounded-lg profile-btn border-gray-700 hover:border-red-500 text-red-400">
+                            <div class="font-medium">رداستون</div>
+                            <div class="text-xs text-gray-400 mt-1">مکانیک</div>
+                        </button>
+                        <button type="button" onclick="selectStyle('speedrun')" id="btnSpeedrun"
+                                class="py-3 rounded-lg profile-btn border-gray-700 hover:border-purple-500 text-purple-400">
+                            <div class="font-medium">اسپیدران</div>
+                            <div class="text-xs text-gray-400 mt-1">سرعت</div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-8 pt-6 border-t border-gray-800 flex flex-col sm:flex-row justify-between gap-3">
+                <button type="button" onclick="showRecoveryCode()" 
+                        class="px-6 py-3 bg-purple-600 rounded-lg hover:bg-purple-700 font-medium flex items-center justify-center gap-2">
+                    <i class="fas fa-key"></i> کد بازیابی
+                </button>
+                
+                <div class="flex gap-3">
+                    <button type="button" onclick="closeProfileModal()" 
+                            class="px-6 py-3 bg-gray-700 rounded-lg hover:bg-gray-600 font-medium">
+                        بی‌خیال
+                    </button>
+                    <button type="button" onclick="saveProfile()" 
+                            class="px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-lg font-bold hover:from-blue-700 hover:to-cyan-600">
+                        ذخیره پروفایل
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Calculator Modal -->
+    <div id="calculatorModal" class="modal-overlay">
+        <div class="modal-content max-w-md p-6 m-4">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-cyan-300">🧮 ماشین حساب ماین‌کرافت</h3>
+                <button onclick="closeCalculator()" class="text-gray-400 hover:text-white text-xl">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="space-y-6">
+                <div>
+                    <label class="block text-sm mb-2 text-gray-300">نوع محاسبه</label>
+                    <select id="calcType" class="profile-input">
+                        <option value="beacon">هرم بیکن</option>
+                        <option value="full_armor">ست کامل زره</option>
+                        <option value="enchant">انچنت سطح بالا</option>
+                        <option value="portal">پورتال ندر</option>
+                        <option value="potions">پوشن‌های مختلف</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm mb-2 text-gray-300">سطح</label>
+                    <input type="number" id="calcLevel" value="1" min="1" max="5"
+                           class="profile-input calculator-input">
+                </div>
+                
+                <button onclick="calculate()" 
+                        class="w-full py-3 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-lg font-bold hover:from-blue-700 hover:to-cyan-600">
+                    محاسبه کن
+                </button>
+                
+                <div id="calcResult" class="mt-4 p-4 bg-gray-800 rounded-lg hidden">
+                    <!-- Results will appear here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Video Suggestions -->
+    <div id="videoModal" class="modal-overlay">
+        <div class="modal-content max-w-lg p-6 m-4">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-purple-300">🎥 ویدیوهای هیروکرفت</h3>
+                <button onclick="closeVideoModal()" class="text-gray-400 hover:text-white text-xl">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div id="videoList" class="space-y-3">
+                <!-- Videos will be loaded here -->
+            </div>
+            
+            <div class="mt-6 text-center">
+                <a href="https://www.aparat.com/herocraftr" target="_blank" 
+                   class="inline-block px-6 py-3 bg-purple-600 rounded-lg hover:bg-purple-700 font-medium">
+                    <i class="fab fa-youtube mr-2"></i> کانال هیروکرفت
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // =========== متغیرهای جهانی ===========
+        let playerProfile = {
+            name: 'بازدیدکننده',
+            version: null,
+            skill: 'noob',
+            style: 'survival',
+            xp: 0,
+            level: 1,
+            questions: 0,
+            achievements: [],
+            dailyChallenge: '۳ شب زنده بمان',
+            challengeCompleted: false,
+            rank: 1
+        };
+
+        let currentMode = 'normal';
+        let isInTutorial = false;
+        let tutorialStep = 0;
+        let isReceiving = false;
+        let chatId = '';
+        
+        const tutorialSteps = [
+            {
+                title: "📦 جمع‌آوری چوب",
+                tasks: ["۱۰ بلوک چوب جمع کن", "Workbench بساز", "چوب‌پاره و کلنگ بساز"],
+                tips: "به درخت‌های بلندتر بیشتر چوب می‌دهند"
+            },
+            {
+                title: "⛏️ استخراج سنگ",
+                tasks: ["با کلنگ چوبی سنگ استخراج کن", "حداقل ۲۰ بلوک سنگ جمع کن", "کوره بساز"],
+                tips: "شب شده؟ زیرزمین برو و معدن‌کاری کن"
+            },
+            {
+                title: "🏠 ساخت اولین خانه",
+                tasks: ["خانه ۵×۵ با سنگ بساز", "در و مشعل اضافه کن", "صندوق برای وسایل بساز"],
+                tips: "ارتفاع خانه حداقل ۳ بلوک باشد"
+            },
+            {
+                title: "🔥 پیدا کردن ذغال سنگ",
+                tasks: ["به دنبال ذغال سنگ در کوه‌ها بگرد", "حداقل ۱۰ ذغال جمع کن", "مشعل درست کن"],
+                tips: "ذغال سنگ با لکه‌های سیاه روی سنگ قابل تشخیص است"
+            },
+            {
+                title: "🛏️ ساخت تخت",
+                tasks: ["۳ پشم از گوسفند بگیر", "تخت بساز", "شب را با تخت رد کن"],
+                tips: "با شمشیر به گوسفند بزن تا پشم بیفتد"
+            }
+        ];
+
+        const dailyChallenges = [
+            "۳ شب زنده بمان",
+            "۱۰ زامبی بکش",
+            "یک خانه دو طبقه بساز",
+            "۵ الماس پیدا کن",
+            "به ندر سفر کن",
+            "یک فارم ساده بساز",
+            "با کمان ۱۰ اسکلت بکش",
+            "یک معبد کشف کن"
+        ];
+
+        const videoSuggestions = {
+            'الماس': {title: "راهنمای کامل پیدا کردن الماس", url: "https://aparat.com/herocraftr/diamond"},
+            'فارم': {title: "ساخت فارم آهن ساده", url: "https://aparat.com/herocraftr/ironfarm"},
+            'اندر دراگون': {title: "شکست دادن اندر دراگون", url: "https://aparat.com/herocraftr/enderdragon"},
+            'رداستون': {title: "آموزش رداستون مقدماتی", url: "https://aparat.com/herocraftr/redstone"},
+            'ساختمان': {title: "ساخت خانه مدرن", url: "https://aparat.com/herocraftr/modernhouse"}
+        };
+
+        // =========== سیستم کامل پرامپت تخصصی (300+ خط) ===========
+        const getMinecraftExpertPrompt = () => {
+            return `
+تو یک دستیار تخصصی هوشمند ماین‌کرافت به نام "هیرو" هستی. تو توسط محمدرضا مرزی برای کانال هیروکرفت آپارات ساخته شده‌ای.
+
+📌 **دستورات پایه:**
+- تمام پاسخ‌ها باید به فارسی و راست‌چین باشند
+- از اطلاعات تخصصی زیر استفاده کن
+- همیشه کامل و دقیق پاسخ بده
+- لحن دوستانه و حرفه‌ای داشته باش
+- هر پاسخ را با سلام شروع کن و از نام کاربر استفاده کن: ${playerProfile.name}
+
+🎮 **اطلاعات پایه ماین‌کرافت:**
+
+**انواع حالت‌های بازی:**
+1. Survival (بقا) - اصلی‌ترین حالت بازی
+2. Creative (خلاقانه) - دسترسی نامحدود به منابع
+3. Hardcore (سخت‌جان) - فقط یک زندگی
+4. Adventure (ماجراجویی) - مخصوص مپ‌ها
+5. Spectator (تماشاگر) - فقط مشاهده
+
+**سطح‌های دشواری:**
+- Peaceful (صلح‌آمیز) - هیچ هیولایی اسپاون نمی‌شود
+- Easy (آسان) - هیولاها آسیب کمتری می‌زنند
+- Normal (معمولی) - تنظیمات استاندارد
+- Hard (سخت) - هیولاها آسیب بیشتری می‌زنند
+
+⚒️ **سیستم معدنی و منابع:**
+
+**الماس (Diamond):**
+- سطح یافتن: Y=-64 تا Y=16 (بهترین در Y=-59)
+- ابزار مورد نیاز: Iron Pickaxe یا بهتر
+- کاربرد: بهترین ابزارها، زره، جادوگری
+
+**آهن (Iron):**
+- سطح یافتن: Y=-64 تا Y=72 (بهترین در Y=16)
+- فراوان‌ترین در: Y=16
+- کاربرد: ابزار، زره، ریل، هاپر
+
+**طلا (Gold):**
+- سطح یافتن: Y=-64 تا Y=32 (بهترین در Y=-16)
+- کاربرد: ابزار سریع اما کم دوام، پوشاک خوک‌های زره‌دار
+
+**مس (Copper):**
+- سطح یافتن: Y=-16 تا Y=112 (بهترین در Y=48)
+- کاربرد: رعد و برق‌گیر، تزئینات
+
+**زغال سنگ (Coal):**
+- سطح یافتن: Y=0 تا Y=192 (بهترین در Y=96)
+- کاربرد: سوخت، مشعل
+
+🔥 **هیولاها و موجودات:**
+
+**هیولاهای شبانه:**
+1. زامبی (Zombie)
+   - سلامت: 20
+   - آسیب: 2-6 (بسته به دشواری)
+   - دراپ: گوشت فاسد، آهن، سیب زمینی
+
+2. اسکلت (Skeleton)
+   - سلامت: 20
+   - آسیب: تیر (1-4)
+   - دراپ: استخوان، تیر، کمان
+
+3. عنکبوت (Spider)
+   - سلامت: 16
+   - آسیب: 2-3
+   - دراپ: نخ، چشم عنکبوت
+
+4. کریپر (Creeper)
+   - سلامت: 20
+   - آسیب: انفجار (22-49)
+   - دراپ: باروت
+
+**هیولاهای ندر:**
+1. اندرمن (Enderman)
+   - سلامت: 40
+   - آسیب: 4-10
+   - دراپ: مروارید اندر
+
+2. ویتر (Wither)
+   - سلامت: 300
+   - آسیب: جمجمه ویتر (5-8)
+   - دراپ: ستاره ندر
+
+3. اندر دراگون (Ender Dragon)
+   - سلامت: 200
+   - آسیب: 6-15
+   - دراپ: تخم اندر
+
+⚔️ **سلاح‌ها و زره‌ها:**
+
+**رده‌بندی مواد زره:**
+1. چرمی - کمترین محافظت
+2. طلایی - سریع‌تر از آهن
+3. زنجیری - کمیاب
+4. آهنی - متعادل
+5. الماسی - بهترین
+6. ندرایت - افسانه‌ای
+
+**مقایسه شمشیرها:**
+- چوبی: آسیب 4
+- سنگی: آسیب 5
+- طلایی: آسیب 4 (سریع)
+- آهنی: آسیب 6
+- الماسی: آسیب 7
+- ندرایت: آسیب 8
+
+🏰 **پیشرفت در بازی:**
+
+**مراحل اصلی:**
+1. چوب جمع‌کنی
+2. سنگ جمع‌کنی
+3. آهن پیدا کنی
+4. الماس پیدا کنی
+5. به ندر برسی
+6. اندر دراگون رو بکشی
+7. به اندر سیتی برسی
+8. ویتر رو بکشی
+
+🔮 **جادوگری (Enchanting):**
+
+**جادوهای مهم ابزار:**
+- Efficiency (کارایی) - سریع‌تر کندن
+- Fortune (ثروت) - منابع بیشتر
+- Silk Touch (لمس ابریشمی) - بلوک اصلی
+- Unbreaking (شکننده نبودن) - دوام بیشتر
+
+**جادوهای مهم شمشیر:**
+- Sharpness (تندی) - آسیب بیشتر
+- Knockback (پس‌زدن) - دور کردن دشمن
+- Fire Aspect (جنبه آتش) - آتش زدن
+- Looting (غارت) - دراپ بیشتر
+
+**جادوهای مهم زره:**
+- Protection (محافظت) - محافظت کلی
+- Fire Protection (محافظت آتش) - در برابر آتش
+- Blast Protection (محافظت انفجار) - در برابر انفجار
+- Feather Falling (سقوط پر) - کاهش آسیب سقوط
+
+🏗️ **ساختمان‌ها و اتوماسیون:**
+
+**فارم‌های مهم:**
+1. فارم آهن (Iron Farm)
+   - نیاز به: ۳ دهکده‌نشین، ۳ تخت
+   - تولید: 400-600 آهن در ساعت
+
+2. فارم تجربه (XP Farm)
+   - انواع: اسپاونر، اندرمن، گاردین
+
+3. فارم غذا (Food Farm)
+   - انواع: گندم، سیب زمینی، هویج
+
+**ماشین‌های رداستون:**
+1. در اتوماتیک
+2. تله‌های مختلف
+3. سیستم‌های ترابری
+4. دستگاه‌های طبقه‌بندی
+
+🌍 **بعدها (Dimensions):**
+
+**1. overworld (دنیای اصلی):**
+- همه موجودات عادی
+- همه منابع اصلی
+- روستاها، معابد، قلعه‌ها
+
+**2. ندر (The Nether):**
+- پورتال: با 10 عدد obsidian
+- موجودات: زامبی پیگلین، گاست، بلیز
+- منابع: ندرایت، کوارتز، glowstone
+
+**3. اندر (The End):**
+- پورتال: با 12 عدد چشم اندر
+- موجودات: اندرمن، اندر دراگون، شالکر
+- منابع: اندر استون، purpur blocks
+
+📊 **مکانیک‌های پیشرفته:**
+
+**سیستم Redstone:**
+- کامپوننت‌ها: repeater, comparator, piston
+- کاربرد: منطق دیجیتال، تایمر، مدار
+
+**سیستم Brewing:**
+- ساخت portion های مختلف
+- effects: سرعت، قدرت، درمان
+
+**سیستم Beacon:**
+- نیاز به: هرم از آهن، طلا، الماس، یا ندرایت
+- effects: سرعت، haste، مقاومت، پرش
+
+🎯 **راهنمای مبارزه:**
+
+**مبارزه با اندر دراگون:**
+1. ۱۲ عدد چشم اندر جمع کن
+2. پورتال اندر رو فعال کن
+3. تیر و کمان قوی بیار
+4. بطری‌های درمان همراه داشته باش
+5. ابتدا کریستال‌ها رو نابود کن
+6. سپس خود دراگون رو بکش
+
+**مبارزه با ویتر:**
+1. ۴ عدد soul sand و ۳ عدد wither skull
+2. در فضای باز ویتر رو احضار کن
+3. پشت بلوک‌ها پنهان شو
+4. از کمان با قدرت enchant استفاده کن
+5. وقتی نزدیک شد با شمشیر بزن
+
+💎 **ندرایت (Netherite):**
+- پیدا کردن: در ندر، Y=8 تا Y=22
+- نیاز به: Diamond tools برای استخراج
+- ارتقا: در smithing table
+- ویژگی: ضد آتش، مقاوم‌تر از الماس
+
+🔥 **به‌روزرسانی‌های مهم:**
+
+**1.19 The Wild Update:**
+- بیوم mangrove swamp
+- موجود warden
+- شهرهای ancient city
+
+**1.20 Trails & Tales:**
+- شتر (camel)
+- archeology system
+- بیوم cherry grove
+
+📈 **آمار و رکوردها:**
+
+**سرعت استخراج (با Efficiency V):**
+- چوب: 0.05 ثانیه
+- سنگ: 0.25 ثانیه
+- آهن: 0.45 ثانیه
+- الماس: 0.6 ثانیه
+- obsidian: 4.15 ثانیه
+
+**مقاومت زره‌ها:**
+- چرم: 28
+- طلا: 44
+- زنجیری: 48
+- آهن: 60
+- الماس: 80
+- ندرایت: 84
+
+🎪 **مینی‌گیم‌ها و چالش‌ها:**
+
+**چالش‌های معروف:**
+1. Skyblock - شروع در جزیره کوچک
+2. Hardcore - فقط یک زندگی
+3. Speedrun - سریع‌ترین زمان برای kill dragon
+4. Ultra Hardcore - no natural regeneration
+
+**مینی‌گیم‌های محبوب:**
+- Bed Wars
+- Sky Wars
+- Build Battle
+- Murder Mystery
+
+⚠️ **نکات امنیتی:**
+
+**در برابر Creeper:**
+- فاصله ۲-۳ بلوکی نگه دار
+- صدای fuse رو گوش کن
+- اگر نزدیک شد، عقب بپر
+
+**در برابر Enderman:**
+- به چشم‌هاش نگاه نکن
+- زیر سقف ۲ بلوکی بایست
+- آب اونها رو فراری میده
+
+**در برابر Skeleton:**
+- زیگ زاگ حرکت کن
+- از سپر استفاده کن
+- سریع نزدیک شو
+
+🌟 **ترفندهای پیشرفته:**
+
+**1. TNT Duplicator:**
+- با استفاده از slime blocks و observers
+- برای quarry های سریع
+
+**2. Zero Tick Farm:**
+- برای رشد سریع گیاهان
+- در 1.16 حذف شد
+
+**3. Mob Switch:**
+- با استفاده از 70 عدد shulker
+- غیرفعال کردن spawn mobs
+
+**4. Iron Farm Stacking:**
+- چندین فارم آهن روی هم
+- تولید هزاران آهن در ساعت
+
+🏆 **رکوردهای جهانی:**
+
+- سریع‌ترین Speedrun: 3 دقیقه و 47 ثانیه
+- بیشترین الماس در یک ساعت: 1,247 عدد
+- بزرگترین build: 1:1 scale of Middle-earth
+- طولانی‌ترین survival: بیش از 10 سال
+
+📱 **ورژن‌های مختلف:**
+
+**Java Edition:**
+- اصلی‌ترین نسخه
+- مودهای نامحدود
+- سرورهای شخصی
+
+**Bedrock Edition:**
+- کراس پلتفرم
+- بازار (Marketplace)
+- Add-ons
+
+**Pocket Edition:**
+- برای موبایل
+- کنترل‌های لمسی
+- بهینه برای دستگاه‌های ضعیف
+
+🎨 **ساختمان‌های معروف:**
+
+**توسط جامعه:**
+1. WesterosCraft - گیم آف ترونز
+2. Middle-earth - ارباب حلقه‌ها
+3. Imperial City - جنگ ستارگان
+
+**توسط Mojang:**
+1. Minecraft Live builds
+2. Minecon زمین‌ها
+3. تبلیغات فیلم‌ها
+
+🔧 **مودها و دیتاپک‌ها:**
+
+**مودهای محبوب:**
+1. OptiFine - بهینه‌سازی گرافیک
+2. JourneyMap - نقشه‌برداری
+3. Tinkers Construct - ابزارهای پیشرفته
+4. Thaumcraft - جادوگری
+
+**دیتاپک‌های معروف:**
+1. Vanilla Tweaks - تنظیمات vanilla
+2. Better Vanilla Building - ساختمان بهتر
+3. Terralith - زمین‌های بهتر
+
+🚀 **آینده ماین‌کرافت:**
+
+**در حال توسعه:**
+- سیستم archeology کامل
+- بیوم‌های بیشتر
+- موجودات جدید
+- مکانیک‌های جدید Redstone
+
+**درخواست‌های جامعه:**
+- Vertical slabs
+- بیشترین dimensions
+- حیوانات اهلی بیشتر
+- ابزارهای جدید
+
+📚 **منابع یادگیری:**
+
+**کانال‌های یوتیوب فارسی:**
+1. هیروکرفت (HeroCraft)
+2. پارسی کلیپ
+3. ماین‌پارسی
+
+**سایت‌های فارسی:**
+1. Minecraft Wiki فارسی
+2. forums.minecraft.ir
+3. minecraftparsi.com
+
+**کتاب‌های رسمی:**
+1. Minecraft Redstone Handbook
+2. Minecraft Combat Handbook
+3. Minecraft Construction Handbook
+
+📌 **اطلاعات پروفایل کاربر:**
+- نام: ${playerProfile.name}
+- نسخه بازی: ${playerProfile.version || 'تعیین نشده'}
+- سطح مهارت: ${playerProfile.skill}
+- سبک بازی: ${playerProfile.style}
+- سطح: ${playerProfile.level}
+- XP: ${playerProfile.xp}
+- چالش روزانه: ${playerProfile.dailyChallenge}
+
+💬 **سبک پاسخگویی تو:**
+- همیشه با سلام شروع کن و نام کاربر را به کار ببر
+- اطلاعات را بر اساس سطح کاربر تنظیم کن
+- اگر سوال مبهم بود، شفاف‌سازی کن
+- از مثال‌های عملی استفاده کن
+- نکات ایمنی را یادآوری کن
+- در پایان، برای سوالات بیشتر دعوت کن
+
+🎭 **شخصیت تو:**
+تو یک متخصص خونگرم و صبور ماین‌کرافت هستی. 
+عاشق کمک به بازیکنان جدید و قدیمی هستی.
+همیشه با انرژی مثبت پاسخ میدی.
+اطلاعاتت کاملاً به‌روز و دقیق هست.
+
+📝 **قالب پاسخ:**
+1. سلام و احوال‌پرسی (با نام کاربر)
+2. پاسخ مستقیم به سوال
+3. توضیحات تکمیلی
+4. نکات مهم
+5. راه‌حل‌های جایگزین
+6. دعوت به سوال بیشتر
+
+🎯 **تطبیق با پروفایل کاربر:**
+
+**اگر سطح Noob:**
+- توضیحات را ساده و قدم به قدم بده
+- از اصطلاحات پیچیده اجتناب کن
+- نکات ایمنی ابتدایی را یادآوری کن
+
+**اگر سطح Pro:**
+- مستقیم به نکات پیشرفته برو
+- از اصطلاحات تخصصی استفاده کن
+- ترفندهای حرفه‌ای را آموزش بده
+
+**اگر سبک Survival:**
+- روی بقا و منابع تمرکز کن
+- نکات ایمنی شبانه را بگو
+- راه‌های تولید غذا را آموزش بده
+
+**اگر سبک Builder:**
+- روی زیبایی و خلاقیت تمرکز کن
+- بلوک‌های مناسب را پیشنهاد کن
+- تکنیک‌های ساختمان را آموزش بده
+
+**اگر سبک Speedrun:**
+- روی سرعت و بهینه‌سازی تمرکز کن
+- راه‌های کوتاه را پیشنهاد کن
+- تکنیک‌های سریع را آموزش بده
+
+🏁 **شروع مکالمه:**
+هروقت کاربر پیامی فرستاد، طبق اطلاعات بالا و با لحن دوستانه پاسخ بده.
+همیشه پروفایل کاربر را در نظر بگیر و پاسخ را شخصی‌سازی کن.
+`;
+        };
+
+        // =========== سیستم ذخیره‌سازی محلی ===========
+        function loadFromLocalStorage() {
+            try {
+                const savedName = localStorage.getItem('mc_name');
+                if (savedName) {
+                    console.log('📥 بارگذاری پروفایل از localStorage');
+                    playerProfile.name = savedName;
+                    playerProfile.version = localStorage.getItem('mc_version');
+                    playerProfile.skill = localStorage.getItem('mc_skill') || 'noob';
+                    playerProfile.style = localStorage.getItem('mc_style') || 'survival';
+                    playerProfile.xp = parseInt(localStorage.getItem('mc_xp')) || 0;
+                    playerProfile.level = parseInt(localStorage.getItem('mc_level')) || 1;
+                    playerProfile.questions = parseInt(localStorage.getItem('mc_questions')) || 0;
+                    playerProfile.rank = parseInt(localStorage.getItem('mc_rank')) || 1;
+                    playerProfile.dailyChallenge = localStorage.getItem('mc_daily_challenge') || dailyChallenges[0];
+                    playerProfile.challengeCompleted = localStorage.getItem('mc_challenge_completed') === 'true';
+                    
+                    // بازیابی achievements
+                    const savedAchievements = localStorage.getItem('mc_achievements');
+                    if (savedAchievements) {
+                        try {
+                            playerProfile.achievements = JSON.parse(savedAchievements);
+                        } catch (e) {
+                            playerProfile.achievements = [];
+                        }
+                    }
+                    
+                    return true;
+                }
+            } catch (error) {
+                console.error('خطا در بارگذاری از localStorage:', error);
+            }
+            return false;
+        }
+
+        function saveToLocalStorage() {
+            try {
+                console.log('💾 ذخیره پروفایل در localStorage');
+                localStorage.setItem('mc_name', playerProfile.name);
+                localStorage.setItem('mc_version', playerProfile.version);
+                localStorage.setItem('mc_skill', playerProfile.skill);
+                localStorage.setItem('mc_style', playerProfile.style);
+                localStorage.setItem('mc_xp', playerProfile.xp.toString());
+                localStorage.setItem('mc_level', playerProfile.level.toString());
+                localStorage.setItem('mc_questions', playerProfile.questions.toString());
+                localStorage.setItem('mc_rank', playerProfile.rank.toString());
+                localStorage.setItem('mc_daily_challenge', playerProfile.dailyChallenge);
+                localStorage.setItem('mc_challenge_completed', playerProfile.challengeCompleted.toString());
+                localStorage.setItem('mc_achievements', JSON.stringify(playerProfile.achievements));
+                localStorage.setItem('mc_last_save', new Date().toISOString());
+                return true;
+            } catch (error) {
+                console.error('خطا در ذخیره در localStorage:', error);
+                return false;
+            }
+        }
+
+        // =========== سیستم نمایش کاربر ===========
+        function updatePlayerDisplay() {
+            document.getElementById('playerName').textContent = playerProfile.name;
+            document.getElementById('playerXP').textContent = playerProfile.xp;
+            document.getElementById('playerMaxXP').textContent = playerProfile.level * 100;
+            
+            // محاسبه درصد XP
+            const xpPercent = playerProfile.xp % 100;
+            document.getElementById('xpBar').style.width = `${xpPercent}%`;
+            
+            document.getElementById('statQuestions').textContent = playerProfile.questions;
+            document.getElementById('playerRank').textContent = playerProfile.rank;
+            document.getElementById('dailyChallenge').textContent = playerProfile.dailyChallenge;
+            
+            // Update level badge
+            const levelBadge = document.getElementById('playerLevel');
+            levelBadge.className = 'level-badge ';
+            if (playerProfile.xp < 100) {
+                levelBadge.className += 'level-noob';
+                levelBadge.textContent = 'Noob';
+            } else if (playerProfile.xp < 300) {
+                levelBadge.className += 'level-beginner';
+                levelBadge.textContent = 'Beginner';
+            } else if (playerProfile.xp < 600) {
+                levelBadge.className += 'level-intermediate';
+                levelBadge.textContent = 'Intermediate';
+            } else if (playerProfile.xp < 1000) {
+                levelBadge.className += 'level-pro';
+                levelBadge.textContent = 'Pro';
+            } else {
+                levelBadge.className += 'level-master';
+                levelBadge.textContent = 'Master';
+            }
+            
+            // Update achievement badges
+            if (playerProfile.questions > 0) {
+                document.getElementById('firstQuestionBadge').style.display = 'block';
+            }
+            if (playerProfile.questions > 10) {
+                document.getElementById('proBadge').classList.remove('hidden');
+            }
+        }
+
+        function addXP(amount) {
+            playerProfile.xp += amount;
+            playerProfile.questions++;
+            
+            const oldLevel = playerProfile.level;
+            playerProfile.level = Math.floor(playerProfile.xp / 100) + 1;
+            
+            if (playerProfile.level > oldLevel) {
+                showLevelUpMessage();
+                playerProfile.rank += 1;
+            }
+            
+            saveToLocalStorage();
+            updatePlayerDisplay();
+            showToast(`+${amount} XP اضافه شد!`, 'success');
+        }
+
+        function showLevelUpMessage() {
+            const messages = [
+                "🎉 آفرین! Level UP کردی!",
+                "🚀 عالی بود! به Level جدید رسیدی!",
+                "👑 تو داری حرفه‌ای می‌شی!",
+                "💪 پیشرفت عالی! ادامه بده!"
+            ];
+            
+            const randomMsg = messages[Math.floor(Math.random() * messages.length)];
+            addMessageToChat(randomMsg + ` (سطح ${playerProfile.level})`, false);
+        }
+
+        // =========== مدیریت حالت‌ها ===========
+        function setMode(mode) {
+            currentMode = mode;
+            const chatContainer = document.getElementById('chatContainer');
+            const modeIndicator = document.getElementById('modeIndicator');
+            const currentModeSpan = document.getElementById('currentMode');
+            
+            // Reset button colors
+            const modeButtons = ['modeNormal', 'modeSpeedrun', 'modeTutor'];
+            modeButtons.forEach(btnId => {
+                const btn = document.getElementById(btnId);
+                if (btn) {
+                    btn.classList.remove('bg-blue-600');
+                    btn.classList.add('bg-gray-700');
+                }
+            });
+            
+            // Set active button
+            const activeBtn = document.getElementById('mode' + mode.charAt(0).toUpperCase() + mode.slice(1));
+            if (activeBtn) {
+                activeBtn.classList.add('bg-blue-600');
+                activeBtn.classList.remove('bg-gray-700');
+            }
+            
+            // Update UI
+            if (mode === 'speedrun') {
+                chatContainer.classList.add('speedrun-mode');
+                modeIndicator.className = 'mode-indicator mode-speedrun';
+                modeIndicator.textContent = 'حالت اسپیدران';
+                currentModeSpan.textContent = 'حالت اسپیدران ⚡';
+            } else {
+                chatContainer.classList.remove('speedrun-mode');
+                modeIndicator.className = 'mode-indicator mode-normal';
+                modeIndicator.textContent = 'حالت عادی';
+                currentModeSpan.textContent = 'حالت عادی';
+            }
+            
+            modeIndicator.classList.remove('hidden');
+            
+            // Show mode message
+            setTimeout(() => {
+                modeIndicator.classList.add('hidden');
+            }, 3000);
+        }
+
+        // =========== سیستم آموزش ===========
+        function startTutorial() {
+            isInTutorial = true;
+            tutorialStep = 0;
+            document.getElementById('tutorSteps').classList.remove('hidden');
+            document.getElementById('chatContainer').style.height = '520px';
+            loadTutorialStep();
+            setMode('normal');
+        }
+
+        function exitTutorial() {
+            isInTutorial = false;
+            document.getElementById('tutorSteps').classList.add('hidden');
+            document.getElementById('chatContainer').style.height = '400px';
+        }
+
+        function loadTutorialStep() {
+            if (tutorialStep >= tutorialSteps.length) return;
+            
+            const step = tutorialSteps[tutorialStep];
+            const stepElement = document.getElementById('currentStep');
+            const progressElement = document.getElementById('stepProgress');
+            
+            stepElement.innerHTML = `
+                <h4 class="font-bold mb-2">${step.title}</h4>
+                <ul class="list-disc pr-5 space-y-1 mb-3">
+                    ${step.tasks.map(task => `<li>${task}</li>`).join('')}
+                </ul>
+                <div class="text-sm text-green-300">
+                    <i class="fas fa-lightbulb"></i> ${step.tips}
+                </div>
+            `;
+            
+            progressElement.textContent = `گام ${tutorialStep + 1} از ${tutorialSteps.length}`;
+        }
+
+        function nextStep() {
+            if (tutorialStep < tutorialSteps.length - 1) {
+                tutorialStep++;
+                loadTutorialStep();
+                addXP(5);
+            } else {
+                exitTutorial();
+                addMessageToChat("🎓 آموزش مقدماتی کامل شد! آفرین!", false);
+                addXP(50);
+            }
+        }
+
+        function prevStep() {
+            if (tutorialStep > 0) {
+                tutorialStep--;
+                loadTutorialStep();
+            }
+        }
+
+        // =========== مدیریت پروفایل ===========
+        function openProfileModal() {
+            document.getElementById('profileModal').style.display = 'flex';
+            
+            // Set current values
+            const nameInput = document.getElementById('profileName');
+            if (nameInput) {
+                nameInput.value = playerProfile.name;
+            }
+            
+            // Highlight selected version
+            if (playerProfile.version) {
+                selectVersion(playerProfile.version);
+            }
+            
+            // Highlight selected skill
+            if (playerProfile.skill) {
+                selectLevel(playerProfile.skill);
+            }
+            
+            // Highlight selected style
+            if (playerProfile.style) {
+                selectStyle(playerProfile.style);
+            }
+        }
+
+        function closeProfileModal() {
+            document.getElementById('profileModal').style.display = 'none';
+        }
+
+        function selectVersion(version) {
+            playerProfile.version = version;
+            
+            // Update UI
+            document.getElementById('btnJava').classList.remove('selected', 'border-blue-500');
+            document.getElementById('btnBedrock').classList.remove('selected', 'border-blue-500');
+            
+            const selectedBtn = document.getElementById(`btn${version.charAt(0).toUpperCase() + version.slice(1)}`);
+            if (selectedBtn) {
+                selectedBtn.classList.add('selected', 'border-blue-500');
+            }
+        }
+
+        function selectLevel(level) {
+            playerProfile.skill = level;
+            
+            // Update UI
+            const levelButtons = ['btnNoob', 'btnIntermediate', 'btnPro'];
+            levelButtons.forEach(btnId => {
+                const btn = document.getElementById(btnId);
+                if (btn) {
+                    btn.classList.remove('selected', 'border-red-500', 'border-blue-500', 'border-green-500');
+                }
+            });
+            
+            const colorClass = level === 'noob' ? 'border-red-500' : 
+                             level === 'intermediate' ? 'border-blue-500' : 'border-green-500';
+            
+            const selectedBtn = document.getElementById(`btn${level.charAt(0).toUpperCase() + level.slice(1)}`);
+            if (selectedBtn) {
+                selectedBtn.classList.add('selected', colorClass);
+            }
+        }
+
+        function selectStyle(style) {
+            playerProfile.style = style;
+            
+            // Update UI
+            const styleColors = {
+                'survival': 'border-green-500',
+                'builder': 'border-yellow-500',
+                'redstone': 'border-red-500',
+                'speedrun': 'border-purple-500'
+            };
+            
+            const styleButtons = ['btnSurvival', 'btnBuilder', 'btnRedstone', 'btnSpeedrun'];
+            styleButtons.forEach(btnId => {
+                const btn = document.getElementById(btnId);
+                if (btn) {
+                    btn.classList.remove('selected', 'border-green-500', 'border-yellow-500', 'border-red-500', 'border-purple-500');
+                }
+            });
+            
+            const selectedBtn = document.getElementById(`btn${style.charAt(0).toUpperCase() + style.slice(1)}`);
+            if (selectedBtn && styleColors[style]) {
+                selectedBtn.classList.add('selected', styleColors[style]);
+            }
+        }
+
+        function saveProfile() {
+            const nameInput = document.getElementById('profileName');
+            if (nameInput && nameInput.value.trim()) {
+                playerProfile.name = nameInput.value.trim();
+            }
+            
+            // اعتبارسنجی
+            if (!playerProfile.name || playerProfile.name.trim() === '') {
+                showToast('⚠️ لطفا نام خود را وارد کنید', 'warning');
+                return;
+            }
+            
+            if (!playerProfile.version) {
+                showToast('⚠️ لطفا ورژن بازی را انتخاب کنید', 'warning');
+                return;
+            }
+            
+            if (!playerProfile.skill) {
+                showToast('⚠️ لطفا سطح مهارت را انتخاب کنید', 'warning');
+                return;
+            }
+            
+            if (!playerProfile.style) {
+                showToast('⚠️ لطفا سبک بازی را انتخاب کنید', 'warning');
+                return;
+            }
+            
+            // Save to localStorage
+            const saved = saveToLocalStorage();
+            if (saved) {
+                updatePlayerDisplay();
+                updateSuggestedQuestions();
+                closeProfileModal();
+                
+                showToast('✅ پروفایل با موفقیت ذخیره شد!', 'success');
+                addMessageToChat(`👋 سلام ${playerProfile.name}! پروفایل شما تنظیم شد.`, false);
+            } else {
+                showToast('❌ خطا در ذخیره پروفایل', 'error');
+            }
+        }
+
+        // =========== سیستم ماشین حساب ===========
+        function openCalculator() {
+            document.getElementById('calculatorModal').style.display = 'flex';
+        }
+
+        function closeCalculator() {
+            document.getElementById('calculatorModal').style.display = 'none';
+            document.getElementById('calcResult').classList.add('hidden');
+        }
+
+        function calculate() {
+            const type = document.getElementById('calcType').value;
+            const level = parseInt(document.getElementById('calcLevel').value) || 1;
+            let result = '';
+            
+            switch(type) {
+                case 'beacon':
+                    const baseBlocks = [9, 34, 83, 164][level-1] || 164;
+                    result = `
+                        <h4 class="font-bold mb-2 text-cyan-300">هرم بیکن سطح ${level}</h4>
+                        <p class="mb-2">تعداد بلوک مورد نیاز: <strong class="text-yellow-400">${baseBlocks}</strong></p>
+                        <p class="text-sm mb-1">📊 اگر از آهن استفاده کنی: ${baseBlocks * 9} Iron Ingot</p>
+                        <p class="text-sm mb-1">💎 اگر از الماس استفاده کنی: ${baseBlocks} Diamond Block</p>
+                        <p class="text-sm mb-1">💰 اگر از طلا استفاده کنی: ${baseBlocks * 9} Gold Ingot</p>
+                        <p class="mt-3 text-xs text-gray-300">💡 نکته: برای سطح ۴ باید ۴ لایه بسازی (9+25+49+81=164 بلوک)</p>
+                    `;
+                    break;
+                    
+                case 'full_armor':
+                    result = `
+                        <h4 class="font-bold mb-2 text-cyan-300">ست کامل زره</h4>
+                        <p class="mb-2">🛡️ برای الماس: <strong class="text-yellow-400">۲۴ Diamond</strong></p>
+                        <p class="text-sm mb-1">⚔️ برای شمشیر الماس: +۲ Diamond</p>
+                        <p class="text-sm mb-1">⛏️ برای کلنگ الماس: +۳ Diamond</p>
+                        <p class="text-sm mb-1">🔨 برای تبر الماس: +۳ Diamond</p>
+                        <p class="mt-3 font-bold">🎒 مجموع برای ست کامل: <span class="text-green-400">۳۲ Diamond</span></p>
+                    `;
+                    break;
+                    
+                case 'enchant':
+                    const xpLevels = [1, 8, 16, 24, 32];
+                    const lapis = [1, 3, 5, 7, 9];
+                    result = `
+                        <h4 class="font-bold mb-2 text-cyan-300">انچنت سطح ${level}</h4>
+                        <p class="mb-2">📈 سطح XP مورد نیاز: <strong class="text-yellow-400">${xpLevels[level-1] || 32}</strong></p>
+                        <p class="text-sm mb-1">🔵 لاپیس لازار: ${lapis[level-1] || 9}</p>
+                        <p class="text-sm mb-1">🎰 شانس انچنت خوب: ${['30%','25%','20%','15%','10%'][level-1] || '10%'}</p>
+                        <p class="mt-3 text-xs text-gray-300">💡 نکته: با bookshelf بیشتر، انچنت‌های بهتری می‌گیری</p>
+                    `;
+                    break;
+                    
+                case 'portal':
+                    result = `
+                        <h4 class="font-bold mb-2 text-cyan-300">پورتال ندر</h4>
+                        <p class="mb-2">🔥 مورد نیاز: <strong class="text-yellow-400">۱۰ Obsidian</strong></p>
+                        <p class="text-sm mb-1">⛏️ برای استخراج: Diamond Pickaxe با Silk Touch یا Diamond Pickaxe معمولی</p>
+                        <p class="text-sm mb-1">🔥 برای فعال کردن: Flint and Steel</p>
+                        <p class="mt-3 text-xs text-gray-300">💡 نکته: پورتال باید مستطیل ۴×۵ باشد (بدون گوشه‌ها)</p>
+                    `;
+                    break;
+                    
+                case 'potions':
+                    result = `
+                        <h4 class="font-bold mb-2 text-cyan-300">پوشن سطح ${level}</h4>
+                        <p class="mb-2">🧪 آب‌شیشه‌ها: <strong class="text-yellow-400">${level}</strong></p>
+                        <p class="text-sm mb-1">🔥 مواد اولیه: Nether Wart + مواد خاص</p>
+                        <p class="text-sm mb-1">⏱️ زمان اثر: ${level * 3} دقیقه (با Redstone بیشتر)</p>
+                        <p class="text-sm mb-1">⚡ قدرت: ${level} (با Glowstone بیشتر)</p>
+                        <p class="mt-3 text-xs text-gray-300">💡 نکته: از Brewing Stand استفاده کن</p>
+                    `;
+                    break;
+            }
+            
+            const resultDiv = document.getElementById('calcResult');
+            resultDiv.innerHTML = result;
+            resultDiv.classList.remove('hidden');
+        }
+
+        // =========== سیستم ویدیو ===========
+        function showVideoSuggestions() {
+            document.getElementById('videoModal').style.display = 'flex';
+            
+            const videoList = document.getElementById('videoList');
+            videoList.innerHTML = '';
+            
+            for (const [topic, video] of Object.entries(videoSuggestions)) {
+                videoList.innerHTML += `
+                    <div class="video-suggestion p-4 rounded-lg">
+                        <div class="font-bold text-white">${video.title}</div>
+                        <div class="text-sm text-gray-400 mt-1">موضوع: ${topic}</div>
+                        <a href="${video.url}" target="_blank" 
+                           class="inline-block mt-3 text-sm text-purple-300 hover:text-purple-400 font-medium">
+                            <i class="fas fa-play mr-2"></i> تماشای ویدیو
+                        </a>
+                    </div>
+                `;
+            }
+        }
+
+        function closeVideoModal() {
+            document.getElementById('videoModal').style.display = 'none';
+        }
+
+        // =========== سوالات پیشنهادی ===========
+        function updateSuggestedQuestions() {
+            const questionsDiv = document.getElementById('suggestedQuestions');
+            let questions = [];
+            
+            // Personalized questions based on profile
+            if (playerProfile.skill === 'noob') {
+                questions = [
+                    'چطور اولین شب را زنده بمانم؟',
+                    'چطور غذا پیدا کنم؟',
+                    'ساده‌ترین خانه چطور ساخته می‌شود؟',
+                    'چطور تخت بسازم؟',
+                    'چطور ذغال سنگ پیدا کنم؟',
+                    'چطور مشعل درست کنم؟'
+                ];
+            } else if (playerProfile.style === 'builder') {
+                questions = [
+                    'بهترین بلوک‌ها برای ساختمان چیست؟',
+                    'چطور خانه مدرن بسازم؟',
+                    'ایده‌های خلاقانه برای دکوراسیون',
+                    'طراحی داخلی خانه',
+                    'چطور باغ زیبا بسازم؟',
+                    'نورپردازی در ساختمان'
+                ];
+            } else if (playerProfile.style === 'redstone') {
+                questions = [
+                    'ساده‌ترین مدار رداستون',
+                    'چطور در اتوماتیک بسازم؟',
+                    'آموزش comparator',
+                    'فارم خودکار کشاورزی',
+                    'سیستم ترابری با پیستون',
+                    'چراغ چشمک‌زن بسازم'
+                ];
+            } else {
+                questions = [
+                    'چطوری الماس پیدا کنم؟',
+                    'بهترین راه دفاع در شب چیست؟',
+                    'چطور پورتال ندر بسازم؟',
+                    'تفاوت Java و Bedrock چیست؟',
+                    'چطور فارم بسازم؟',
+                    'بهترین انچنت‌ها کدامند؟'
+                ];
+            }
+            
+            // Randomize and display
+            questionsDiv.innerHTML = '';
+            questions.sort(() => Math.random() - 0.5).slice(0, 3).forEach(q => {
+                questionsDiv.innerHTML += `
+                    <div class="suggested-question p-4 text-center cursor-pointer" 
+                         onclick="askQuickQuestion('${q}')">
+                        <i class="fas fa-question-circle mr-2 text-blue-400"></i>
+                        <span class="text-sm">${q}</span>
+                    </div>
+                `;
+            });
+        }
+
+        // =========== سیستم چت ===========
+        function createMessageElement(text, isUser = false) {
+            const messageDiv = document.createElement("div");
+            messageDiv.className = `message-bubble p-4 ${isUser ? 'user-bubble self-end' : 'bot-bubble self-start'}`;
+            
+            const time = new Date().toLocaleTimeString('fa-IR', {hour: '2-digit', minute:'2-digit'});
+            
+            if (!isUser) {
+                messageDiv.innerHTML = `
+                    <div class="flex items-center gap-2 mb-2">
+                        <div class="w-6 h-6 rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 flex items-center justify-center">
+                            <i class="fas fa-robot text-xs"></i>
+                        </div>
+                        <span class="font-bold">هیرو</span>
+                        <span class="text-xs text-gray-400">${time}</span>
+                    </div>
+                    <div class="rtl-text">${escapeHtml(text)}</div>
+                `;
+            } else {
+                messageDiv.innerHTML = `
+                    <div class="flex items-center gap-2 mb-2 justify-end">
+                        <span class="text-xs text-gray-400">${time}</span>
+                        <span class="font-bold">${escapeHtml(playerProfile.name)}</span>
+                        <div class="w-6 h-6 rounded-full bg-gradient-to-r from-green-500 to-emerald-400 flex items-center justify-center">
+                            <i class="fas fa-user text-xs"></i>
+                        </div>
+                    </div>
+                    <div class="rtl-text">${escapeHtml(text)}</div>
+                `;
+            }
+            
+            return messageDiv;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function addMessageToChat(text, isUser = false) {
+            const messageElement = createMessageElement(text, isUser);
+            const chatbox = document.getElementById('chatbox');
+            chatbox.appendChild(messageElement);
+            chatbox.scrollTop = chatbox.scrollHeight;
+            
+            if (!isUser) {
+                addXP(10);
+            }
+        }
+
+        function showTyping() {
+            document.getElementById('typingIndicator').classList.remove('hidden');
+            const chatbox = document.getElementById('chatbox');
+            chatbox.scrollTop = chatbox.scrollHeight;
+        }
+
+        function hideTyping() {
+            document.getElementById('typingIndicator').classList.add('hidden');
+        }
+
+        async function sendMessage() {
+            const messageInput = document.getElementById('messageInput');
+            if (isReceiving || !messageInput.value.trim()) return;
+
+            const messageText = messageInput.value.trim();
+            messageInput.value = "";
+            
+            // Add user message
+            addMessageToChat(messageText, true);
+            
+            // Check for daily challenge completion
+            if (!playerProfile.challengeCompleted) {
+                const challengeText = playerProfile.dailyChallenge.toLowerCase();
+                const messageLower = messageText.toLowerCase();
+                if (messageLower.includes(challengeText.replace('۳', '3').replace('۳', '3')) || 
+                    messageLower.includes('چالش')) {
+                    playerProfile.challengeCompleted = true;
+                    addMessageToChat(`🎯 چالش روزانه "${playerProfile.dailyChallenge}" تکمیل شد! +۵۰ XP`, false);
+                    addXP(50);
+                    saveToLocalStorage();
+                }
+            }
+            
+            // Connect to AI
+            await connectWebSocket(messageText);
+        }
+
+        function askQuickQuestion(question) {
+            const messageInput = document.getElementById('messageInput');
+            messageInput.value = question;
+            sendMessage();
+        }
+
+        async function connectWebSocket(message) {
+            if (isInTutorial) {
+                handleTutorialResponse(message);
+                return;
+            }
+            
+            isReceiving = true;
+            showTyping();
+            
+            if (!chatId) {
+                chatId = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString();
+            }
+            
+            const url = "wss://backend.buildpicoapps.com/api/chatbot/chat";
+            const websocket = new WebSocket(url);
+
+            // Create bot message element
+            const botMessageElement = createMessageElement("", false);
+            document.getElementById('chatbox').appendChild(botMessageElement);
+
+            websocket.addEventListener("open", () => {
+                const fullPrompt = getMinecraftExpertPrompt() + `\n\nکاربر می‌پرسد: "${message}"\n\nلطفا پاسخ بده:`;
+                
+                websocket.send(
+                    JSON.stringify({
+                        chatId: chatId,
+                        appId: "himself-difficult",
+                        systemPrompt: fullPrompt,
+                        message: message,
+                    })
+                );
+            });
+
+            websocket.onmessage = (event) => {
+                const contentDiv = botMessageElement.querySelector('.rtl-text');
+                if (contentDiv) {
+                    contentDiv.textContent += event.data;
+                }
+                document.getElementById('chatbox').scrollTop = document.getElementById('chatbox').scrollHeight;
+            };
+
+            websocket.onclose = (event) => {
+                hideTyping();
+                isReceiving = false;
+                
+                if (event.code !== 1000) {
+                    const contentDiv = botMessageElement.querySelector('.rtl-text');
+                    if (contentDiv) {
+                        const errorDiv = document.createElement('div');
+                        errorDiv.className = 'text-red-400 text-sm mt-2';
+                        errorDiv.textContent = 'خطا در اتصال به سرور. لطفا دوباره تلاش کنید.';
+                        contentDiv.appendChild(errorDiv);
+                        document.getElementById('chatbox').scrollTop = document.getElementById('chatbox').scrollHeight;
+                    }
+                }
+            };
+
+            websocket.onerror = () => {
+                hideTyping();
+                isReceiving = false;
+                
+                const contentDiv = botMessageElement.querySelector('.rtl-text');
+                if (contentDiv) {
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'text-red-400 text-sm mt-2';
+                    errorDiv.textContent = 'خطا در ارتباط با سرور.';
+                    contentDiv.appendChild(errorDiv);
+                    document.getElementById('chatbox').scrollTop = document.getElementById('chatbox').scrollHeight;
+                }
+            };
+        }
+
+        function handleTutorialResponse(message) {
+            showTyping();
+            
+            setTimeout(() => {
+                hideTyping();
+                
+                const responses = [
+                    "آفرین! درست انجام دادی. برو مرحله بعد!",
+                    "عالیه! حالا بریم سراغ مرحله بعدی",
+                    "خوبه! نکته بعدی رو یاد بگیر",
+                    "درسته! این کار رو که یاد گرفتی، برو مرحله بعد"
+                ];
+                
+                const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+                addMessageToChat(randomResponse, false);
+                
+                // Auto-advance after tutorial response
+                setTimeout(() => {
+                    nextStep();
+                }, 1500);
+            }, 1000);
+        }
+
+        // =========== سیستم نوتیفیکیشن ===========
+        function showToast(message, type = 'success') {
+            const toastContainer = document.getElementById('toastContainer');
+            if (!toastContainer) return;
+            
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'exclamation-triangle'}"></i>
+                <span>${message}</span>
+            `;
+            
+            toastContainer.appendChild(toast);
+            
+            // Remove toast after 3 seconds
+            setTimeout(() => {
+                toast.style.animation = 'slideIn 0.3s ease-out reverse';
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        function showSaveNotification() {
+            const saved = saveToLocalStorage();
+            if (saved) {
+                showToast('✅ اطلاعات با موفقیت ذخیره شد!', 'success');
+            } else {
+                showToast('❌ خطا در ذخیره اطلاعات', 'error');
+            }
+        }
+
+        function showRecoveryCode() {
+            const code = Math.random().toString(36).substring(2, 8).toUpperCase();
+            showToast(`🔐 کد بازیابی شما: ${code}`, 'success');
+        }
+
+        // =========== سیستم مدیریت ===========
+        function clearChat() {
+            if (confirm('آیا از پاک کردن تاریخچه چت مطمئنید؟')) {
+                const chatbox = document.getElementById('chatbox');
+                chatbox.innerHTML = `
+                    <div class="message-bubble bot-bubble p-4 self-start">
+                        <div class="flex items-center gap-2 mb-2">
+                            <div class="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center">
+                                <i class="fas fa-robot text-xs"></i>
+                            </div>
+                            <span class="font-bold">هیرو</span>
+                        </div>
+                        <p>سلام ${playerProfile.name}! من هیرو هستم، دستیار هوشمند ماین‌کرافت. 🤖</p>
+                        <p class="mt-2 text-gray-300">می‌تونم در مورد هر چیزی در ماین‌کرافت کمکت کنم!</p>
+                        <div class="mt-3 text-sm text-blue-300">
+                            <i class="fas fa-star"></i> سطح فعلی تو: ${playerProfile.skill}
+                            <br>
+                            <i class="fas fa-bullseye"></i> چالش روزانه: ${playerProfile.dailyChallenge}
+                        </div>
+                    </div>
+                `;
+                updateSuggestedQuestions();
+            }
+        }
+
+        // =========== راه‌اندازی اولیه ===========
+        document.addEventListener('DOMContentLoaded', function() {
+            // بارگذاری اطلاعات ذخیره شده
+            const loaded = loadFromLocalStorage();
+            if (loaded) {
+                updatePlayerDisplay();
+            }
+            
+            // آپدیت سوالات پیشنهادی
+            updateSuggestedQuestions();
+            
+            // تنظیم رویدادها
+            const messageInput = document.getElementById('messageInput');
+            if (messageInput) {
+                messageInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        sendMessage();
+                    }
+                });
+            }
+            
+            // تنظیم دکمه share
+            const shareBtn = document.getElementById('shareLinkBtn');
+            if (shareBtn) {
+                shareBtn.onclick = function() {
+                    navigator.clipboard.writeText(window.location.href).then(() => {
+                        showToast('🔗 لینک کپی شد!', 'success');
+                    }).catch(() => {
+                        showToast('❌ خطا در کپی لینک', 'error');
+                    });
+                };
+            }
+            
+            // چک کردن اولین بار
+            const firstTime = localStorage.getItem('mc_first_time');
+            if (!firstTime) {
+                setTimeout(() => {
+                    openProfileModal();
+                    localStorage.setItem('mc_first_time', 'true');
+                }, 1000);
+            }
+            
+            // تنظیم چالش روزانه اگر وجود ندارد
+            if (!playerProfile.dailyChallenge) {
+                playerProfile.dailyChallenge = dailyChallenges[Math.floor(Math.random() * dailyChallenges.length)];
+                saveToLocalStorage();
+                updatePlayerDisplay();
+            }
+            
+            // رفرش اتوماتیک چالش
+            const now = new Date();
+            const lastReset = localStorage.getItem('mc_last_reset');
+            if (!lastReset || new Date(lastReset).getDate() !== now.getDate()) {
+                playerProfile.challengeCompleted = false;
+                playerProfile.dailyChallenge = dailyChallenges[Math.floor(Math.random() * dailyChallenges.length)];
+                localStorage.setItem('mc_last_reset', now.toISOString());
+                saveToLocalStorage();
+                updatePlayerDisplay();
+                
+                if (playerProfile.questions > 0) {
+                    addMessageToChat(`🎯 چالش روزانه جدید: ${playerProfile.dailyChallenge}`, false);
+                }
+            }
+            
+            // فوکوس روی اینپوت
+            setTimeout(() => {
+                if (messageInput) {
+                    messageInput.focus();
+                }
+            }, 500);
+        });
+
+        // =========== رویدادهای عمومی ===========
+        window.openProfileModal = openProfileModal;
+        window.closeProfileModal = closeProfileModal;
+        window.selectVersion = selectVersion;
+        window.selectLevel = selectLevel;
+        window.selectStyle = selectStyle;
+        window.saveProfile = saveProfile;
+        window.openCalculator = openCalculator;
+        window.closeCalculator = closeCalculator;
+        window.calculate = calculate;
+        window.showVideoSuggestions = showVideoSuggestions;
+        window.closeVideoModal = closeVideoModal;
+        window.setMode = setMode;
+        window.startTutorial = startTutorial;
+        window.exitTutorial = exitTutorial;
+        window.prevStep = prevStep;
+        window.nextStep = nextStep;
+        window.sendMessage = sendMessage;
+        window.askQuickQuestion = askQuickQuestion;
+        window.clearChat = clearChat;
+        window.showSaveNotification = showSaveNotification;
+        window.showRecoveryCode = showRecoveryCode;
+        // =========== رفع باگ‌های نهایی (اضافه به اینجا) ===========
+
+// 1. رفع باگ کلید بازیابی
+function showRecoveryCode() {
+    // تولید کد ۶ رقمی
+    const code = Math.floor(100000 + Math.random() * 900000);
+    
+    // ذخیره کد در localStorage
+    localStorage.setItem('recovery_code', code);
+    localStorage.setItem('recovery_data', JSON.stringify(playerProfile));
+    
+    // نمایش کد
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay';
+    modal.style.display = 'flex';
+    modal.innerHTML = `
+        <div class="modal-content max-w-md p-6 m-4">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-purple-300">🔐 کد بازیابی</h3>
+                <button onclick="this.parentElement.parentElement.parentElement.remove()" 
+                        class="text-gray-400 hover:text-white text-xl">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="text-center py-6">
+                <div class="text-4xl font-bold text-yellow-400 mb-4">${code}</div>
+                <p class="text-gray-300 mb-4">این کد را یادداشت کنید!</p>
+                <p class="text-sm text-gray-400">برای بازیابی اطلاعات، این کد را در صفحه اصلی وارد کنید.</p>
+            </div>
+            <button onclick="copyToClipboard('${code}')" 
+                    class="w-full py-3 bg-purple-600 rounded-lg hover:bg-purple-700 mt-4">
+                <i class="fas fa-copy mr-2"></i> کپی کد
+            </button>
+        </div>
+    `;
+    document.body.appendChild(modal);
+}
+
+// 2. رفع باگ دکمه ذخیره
+function showSaveNotification() {
+    // ذخیره فوری
+    const saved = saveToLocalStorage();
+    
+    // نمایش نوتیفیکیشن
+    if (saved) {
+        showToast('✅ اطلاعات با موفقیت ذخیره شد!', 'success');
+        
+        // تولید لینک قابل اشتراک‌گذاری
+        const params = new URLSearchParams();
+        params.set('name', encodeURIComponent(playerProfile.name));
+        params.set('level', playerProfile.level);
+        params.set('xp', playerProfile.xp);
+        
+        const shareUrl = `${window.location.origin}${window.location.pathname}?${params.toString()}`;
+        
+        // کپی لینک به کلیپ‌بورد
+        setTimeout(() => {
+            navigator.clipboard.writeText(shareUrl).then(() => {
+                showToast('🔗 لینک ذخیره در کلیپ‌بورد کپی شد!', 'success');
+            });
+        }, 1000);
+    } else {
+        showToast('❌ خطا در ذخیره اطلاعات', 'error');
+    }
+}
+
+// 3. رفع باگ تشخیص حالت‌ها
+function updateModeSpecificUI() {
+    const messageInput = document.getElementById('messageInput');
+    const currentModeSpan = document.getElementById('currentMode');
+    
+    if (currentMode === 'speedrun') {
+        // حالت اسپیدران
+        if (messageInput) {
+            messageInput.placeholder = 'سوال اسپیدرانی (کوتاه و سریع)...';
+        }
+        if (currentModeSpan) {
+            currentModeSpan.textContent = 'حالت اسپیدران ⚡';
+            currentModeSpan.className = 'text-xs text-red-300';
+        }
+        
+        // به‌روزرسانی پرامپت
+        updateExpertPrompt();
+    } else {
+        // حالت عادی
+        if (messageInput) {
+            messageInput.placeholder = 'سوال خود را اینجا بنویسید...';
+        }
+        if (currentModeSpan) {
+            currentModeSpan.textContent = 'حالت عادی';
+            currentModeSpan.className = 'text-xs text-cyan-300';
+        }
+    }
+}
+
+// 4. تابع کمکی برای کپی به کلیپ‌بورد
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
+        showToast('📋 کپی شد!', 'success');
+    }).catch(() => {
+        showToast('❌ خطا در کپی', 'error');
+    });
+}
+
+// 5. تابع بهبود یافته setMode
+const originalSetMode = window.setMode;
+window.setMode = function(mode) {
+    // فراخوانی تابع اصلی
+    if (originalSetMode) originalSetMode(mode);
+    
+    // به‌روزرسانی UI حالت
+    setTimeout(updateModeSpecificUI, 100);
+    
+    // نمایش پیام تغییر حالت
+    const modeMessages = {
+        'normal': 'حالت عادی فعال شد',
+        'speedrun': 'حالت اسپیدران فعال شد ⚡',
+        'tutor': 'حالت آموزش فعال شد 📚'
+    };
+    
+    if (modeMessages[mode]) {
+        showToast(modeMessages[mode], 'success');
+    }
+};
+
+// 6. تابع بهبود یافته saveProfile
+const originalSaveProfile = window.saveProfile;
+window.saveProfile = function() {
+    // فراخوانی تابع اصلی
+    if (originalSaveProfile) originalSaveProfile();
+    
+    // نمایش تأیید ذخیره
+    setTimeout(() => {
+        showToast('✅ پروفایل ذخیره شد!', 'success');
+    }, 500);
+};
+
+// 7. راه‌اندازی اولیه حالت‌ها
+document.addEventListener('DOMContentLoaded', function() {
+    // تنظیم حالت پیش‌فرض
+    setTimeout(() => {
+        updateModeSpecificUI();
+    }, 1000);
+    
+    // رویداد کلیک برای دکمه ذخیره
+    const saveBtn = document.querySelector('button[onclick*="showSaveNotification"]');
+    if (saveBtn) {
+        saveBtn.onclick = showSaveNotification;
+    }
+    
+    // رویداد کلیک برای دکمه کد بازیابی
+    const recoveryBtn = document.querySelector('button[onclick*="showRecoveryCode"]');
+    if (recoveryBtn) {
+        recoveryBtn.onclick = showRecoveryCode;
+    }
+});
+
+// 8. تابع بهبود یافته برای پرامپت حالت اسپیدران
+function updateExpertPrompt() {
+    let modeSpecificInstructions = '';
+    
+    if (currentMode === 'speedrun') {
+        modeSpecificInstructions = `
+        📌 **دستورات حالت اسپیدران:**
+        - پاسخ‌ها باید بسیار کوتاه و مستقیم باشند
+        - فقط راه‌های سریع و بهینه را بگو
+        - از توضیحات اضافی خودداری کن
+        - زمان‌بندی و تایمینگ مهم است
+        - خطرات اصلی را ذکر کن (⚠️)
+        - فرمت پاسخ: نکته اصلی → راه‌حل سریع → زمان تخمینی
+        
+        مثال پاسخ اسپیدران:
+        "الماس: برو Y=-59، branch mining، ۵-۱۰ دقیقه اول پیدا میکنی"
+        `;
+    }
+    
+    // پرامپت اصلی با دستورات حالت اضافه می‌شود
+    // (این برای WebSocket استفاده می‌شود)
+    window.getMinecraftExpertPrompt = function() {
+        const basePrompt = `
+        تو یک دستیار تخصصی هوشمند ماین‌کرافت به نام "هیرو" هستی.
+        ${modeSpecificInstructions}
+        
+        اطلاعات کاربر:
+        - نام: ${playerProfile.name}
+        - سطح: ${playerProfile.skill}
+        - حالت فعلی: ${currentMode}
+        
+        لطفا با توجه به حالت فعلی پاسخ بده.
+        `;
+        
+        return basePrompt;
+    };
+}
+
+// 9. تابع بهبود یافته برای نمایش Toast
+function showToast(message, type = 'success') {
+    // حذف toastهای قبلی
+    const oldToasts = document.querySelectorAll('.toast');
+    oldToasts.forEach(toast => toast.remove());
+    
+    // ایجاد toast جدید
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+        <span>${message}</span>
+    `;
+    
+    // اضافه کردن به صفحه
+    document.body.appendChild(toast);
+    
+    // حذف خودکار بعد از ۳ ثانیه
+    setTimeout(() => {
+        if (toast.parentNode) {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateY(100px)';
+            setTimeout(() => toast.remove(), 300);
+        }
+    }, 3000);
+}
+
+// 10. اضافه کردن استایل‌های CSS برای Toast
+const toastStyles = document.createElement('style');
+toastStyles.textContent = `
+    .toast {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        padding: 12px 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        z-index: 1001;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        animation: toastSlideIn 0.3s ease-out;
+        max-width: 300px;
+    }
+    
+    .toast-success {
+        background: linear-gradient(135deg, #059669, #10b981);
+        color: white;
+    }
+    
+    .toast-error {
+        background: linear-gradient(135deg, #dc2626, #ef4444);
+        color: white;
+    }
+    
+    @keyframes toastSlideIn {
+        from {
+            transform: translateY(100px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+    
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.8);
+        backdrop-filter: blur(5px);
+        z-index: 1000;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+    
+    .modal-content {
+        background: linear-gradient(135deg, #1e293b, #0f172a);
+        border: 2px solid #06b6d4;
+        border-radius: 20px;
+        animation: modalAppear 0.3s ease-out;
+        max-width: 500px;
+        width: 100%;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    
+    @keyframes modalAppear {
+        from {
+            opacity: 0;
+            transform: scale(0.9) translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+    }
+`;
+document.head.appendChild(toastStyles);
+
+console.log('✅ سیستم رفع باگ‌ها بارگذاری شد');
+/* اسکرول خودکار به آخر چت */
+function scrollChatToBottom() {
+    const chatbox = document.getElementById("chatbox");
+    chatbox.scrollTop = chatbox.scrollHeight;
+}
+// =========== سیستم ذخیره و بازیابی پیام‌ها ===========
+
+class MessageSaver {
+    constructor() {
+        this.storageKey = 'herocraft_chat_messages';
+        this.maxMessages = 100; // حداکثر تعداد پیام ذخیره شده
+        this.autoSaveDelay = 3000; // هر ۳ ثانیه ذخیره خودکار
+        this.init();
+    }
+    
+    init() {
+        // بارگذاری پیام‌های ذخیره شده
+        this.loadMessages();
+        
+        // شروع ذخیره خودکار
+        this.startAutoSave();
+        
+        // ذخیره هنگام بستن صفحه
+        this.setupBeforeUnload();
+        
+        console.log('💾 سیستم ذخیره پیام‌ها فعال شد');
+    }
+    
+    // بارگذاری پیام‌های ذخیره شده
+    loadMessages() {
+        try {
+            const saved = localStorage.getItem(this.storageKey);
+            if (saved) {
+                const messages = JSON.parse(saved);
+                
+                // فقط اگر چت فعلی خالی است، پیام‌ها را بارگذاری کن
+                const chatbox = document.getElementById('chatbox');
+                if (chatbox && chatbox.children.length <= 1) {
+                    this.restoreMessages(messages);
+                }
+                
+                console.log(`📥 ${messages.length} پیام بازیابی شد`);
+                return true;
+            }
+        } catch (error) {
+            console.error('خطا در بارگذاری پیام‌ها:', error);
+        }
+        return false;
+    }
+    
+    // بازیابی پیام‌ها در چت‌باکس
+    restoreMessages(messages) {
+        const chatbox = document.getElementById('chatbox');
+        if (!chatbox) return;
+        
+        // پاک کردن فقط پیام اول (پیام خوش‌آمدگویی)
+        const welcomeMsg = chatbox.querySelector('.bot-bubble');
+        if (welcomeMsg) {
+            chatbox.innerHTML = '';
+            chatbox.appendChild(welcomeMsg);
+        }
+        
+        // اضافه کردن پیام‌های ذخیره شده
+        messages.forEach(msg => {
+            const messageElement = this.createMessageElement(msg);
+            chatbox.appendChild(messageElement);
+        });
+        
+        // اسکرول به پایین
+        setTimeout(() => {
+            chatbox.scrollTop = chatbox.scrollHeight;
+        }, 100);
+        
+        // نمایش نوتیفیکیشن
+        if (messages.length > 0) {
+            setTimeout(() => {
+                this.showRestoreNotification(messages.length);
+            }, 500);
+        }
+    }
+    
+    // نمایش نوتیفیکیشن بازیابی
+    showRestoreNotification(count) {
+        const notification = document.createElement('div');
+        notification.className = 'fixed top-20 right-4 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg z-50 animate-pulse';
+        notification.innerHTML = `
+            <div class="flex items-center gap-2">
+                <i class="fas fa-history"></i>
+                <span>${count} پیام بازیابی شد</span>
+            </div>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // حذف خودکار بعد از ۳ ثانیه
+        setTimeout(() => {
+            notification.remove();
+        }, 3000);
+    }
+    
+    // ذخیره پیام‌های فعلی
+    saveMessages() {
+        try {
+            const messages = this.extractMessages();
+            if (messages.length > 0) {
+                // محدود کردن تعداد پیام‌های ذخیره شده
+                const limitedMessages = messages.slice(-this.maxMessages);
+                
+                localStorage.setItem(this.storageKey, JSON.stringify(limitedMessages));
+                localStorage.setItem('last_save_time', new Date().toISOString());
+                
+                // نمایش نشانگر ذخیره (فقط در کنسول)
+                console.log('💾 پیام‌ها ذخیره شدند');
+                
+                return true;
+            }
+        } catch (error) {
+            console.error('خطا در ذخیره پیام‌ها:', error);
+        }
+        return false;
+    }
+    
+    // استخراج پیام‌ها از چت‌باکس
+    extractMessages() {
+        const messages = [];
+        const chatbox = document.getElementById('chatbox');
+        
+        if (!chatbox) return messages;
+        
+        const messageElements = chatbox.querySelectorAll('.message-bubble');
+        
+        messageElements.forEach((element, index) => {
+            // نادیده گرفتن پیام اول (خوش‌آمدگویی)
+            if (index === 0) return;
+            
+            const isUser = element.classList.contains('user-bubble');
+            const textElement = element.querySelector('.rtl-text');
+            const timeElement = element.querySelector('.text-xs.text-gray-400');
+            
+            if (textElement) {
+                const message = {
+                    text: textElement.textContent || textElement.innerHTML,
+                    isUser: isUser,
+                    time: timeElement ? timeElement.textContent : new Date().toLocaleTimeString('fa-IR'),
+                    timestamp: new Date().toISOString()
+                };
+                
+                messages.push(message);
+            }
+        });
+        
+        return messages;
+    }
+    
+    // ایجاد المنت پیام
+    createMessageElement(message) {
+        const messageDiv = document.createElement("div");
+        messageDiv.className = `message-bubble p-4 ${message.isUser ? 'user-bubble self-end' : 'bot-bubble self-start'}`;
+        
+        if (!message.isUser) {
+            messageDiv.innerHTML = `
+                <div class="flex items-center gap-2 mb-2">
+                    <div class="w-6 h-6 rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 flex items-center justify-center">
+                        <i class="fas fa-robot text-xs"></i>
+                    </div>
+                    <span class="font-bold">هیرو</span>
+                    <span class="text-xs text-gray-400">${message.time}</span>
+                </div>
+                <div class="rtl-text">${message.text}</div>
+            `;
+        } else {
+            messageDiv.innerHTML = `
+                <div class="flex items-center gap-2 mb-2 justify-end">
+                    <span class="text-xs text-gray-400">${message.time}</span>
+                    <span class="font-bold">${playerProfile.name}</span>
+                    <div class="w-6 h-6 rounded-full bg-gradient-to-r from-green-500 to-emerald-400 flex items-center justify-center">
+                        <i class="fas fa-user text-xs"></i>
+                    </div>
+                </div>
+                <div class="rtl-text">${message.text}</div>
+            `;
+        }
+        
+        return messageDiv;
+    }
+    
+    // شروع ذخیره خودکار
+    startAutoSave() {
+        setInterval(() => {
+            if (this.hasNewMessages()) {
+                this.saveMessages();
+            }
+        }, this.autoSaveDelay);
+    }
+    
+    // بررسی وجود پیام جدید
+    hasNewMessages() {
+        const lastSaveTime = localStorage.getItem('last_save_time');
+        if (!lastSaveTime) return true;
+        
+        const chatbox = document.getElementById('chatbox');
+        if (!chatbox) return false;
+        
+        const messageElements = chatbox.querySelectorAll('.message-bubble');
+        return messageElements.length > 1; // بیشتر از پیام خوش‌آمدگویی
+    }
+    
+    // تنظیم ذخیره هنگام بستن صفحه
+    setupBeforeUnload() {
+        window.addEventListener('beforeunload', () => {
+            this.saveMessages();
+        });
+    }
+    
+    // پاک کردن تمام پیام‌های ذخیره شده
+    clearAllMessages() {
+        if (confirm('آیا از پاک کردن تمام پیام‌های ذخیره شده مطمئنید؟')) {
+            localStorage.removeItem(this.storageKey);
+            localStorage.removeItem('last_save_time');
+            
+            // پاک کردن چت‌باکس (به جز پیام اول)
+            const chatbox = document.getElementById('chatbox');
+            if (chatbox) {
+                const firstMessage = chatbox.querySelector('.message-bubble:first-child');
+                if (firstMessage) {
+                    chatbox.innerHTML = '';
+                    chatbox.appendChild(firstMessage);
+                }
+            }
+            
+            showToast('🗑️ تمام پیام‌ها پاک شدند', 'success');
+            return true;
+        }
+        return false;
+    }
+    
+    // گرفتن آمار پیام‌ها
+    getMessageStats() {
+        try {
+            const saved = localStorage.getItem(this.storageKey);
+            if (saved) {
+                const messages = JSON.parse(saved);
+                return {
+                    total: messages.length,
+                    userMessages: messages.filter(m => m.isUser).length,
+                    botMessages: messages.filter(m => !m.isUser).length,
+                    lastSave: localStorage.getItem('last_save_time')
+                };
+            }
+        } catch (error) {
+            console.error('خطا در گرفتن آمار:', error);
+        }
+        return null;
+    }
+    
+    // نمایش وضعیت ذخیره
+    showSaveStatus() {
+        const stats = this.getMessageStats();
+        if (stats) {
+            console.log(`📊 آمار پیام‌ها: ${stats.total} پیام (${stats.userMessages} کاربر / ${stats.botMessages} ربات)`);
+        }
+    }
+}
+
+// =========== راه‌اندازی سیستم ===========
+
+// ایجاد نمونه ذخیره‌کننده
+const messageSaver = new MessageSaver();
+
+// =========== یکپارچه‌سازی با سیستم موجود ===========
+
+// Hook کردن به تابع clearChat اصلی
+const originalClearChat = window.clearChat;
+window.clearChat = function() {
+    if (confirm('آیا از پاک کردن تاریخچه چت مطمئنید؟\n\n⚠️ پیام‌های ذخیره شده نیز پاک خواهند شد.')) {
+        // پاک کردن ذخیره‌سازی
+        messageSaver.clearAllMessages();
+        
+        // فراخوانی تابع اصلی
+        if (originalClearChat) {
+            originalClearChat();
+        }
+        
+        showToast('✅ تاریخچه چت و ذخیره‌ها پاک شدند', 'success');
+    }
+};
+
+// Hook کردن به تابع sendMessage برای ذخیره فوری
+const originalSendMessage = window.sendMessage;
+if (originalSendMessage) {
+    window.sendMessage = async function() {
+        // فراخوانی تابع اصلی
+        await originalSendMessage();
+        
+        // ذخیره پیام‌ها بعد از ارسال
+        setTimeout(() => {
+            messageSaver.saveMessages();
+        }, 500);
+    };
+}
+
+// اضافه کردن دکمه مدیریت ذخیره به UI
+function addSaveManagementUI() {
+    // اضافه کردن دکمه به هدر چت
+    const chatHeader = document.querySelector('#chatContainer .p-4.border-b');
+    if (chatHeader) {
+        const buttonContainer = chatHeader.querySelector('.flex.gap-2');
+        if (buttonContainer) {
+            // بررسی نکردن وجود دکمه ذخیره
+            const saveBtn = document.createElement('button');
+            saveBtn.id = 'saveMessagesBtn';
+            saveBtn.className = 'text-sm text-gray-400 hover:text-white flex items-center gap-2';
+            saveBtn.innerHTML = '<i class="fas fa-save"></i> ذخیره';
+            saveBtn.title = 'ذخیره پیام‌ها';
+            saveBtn.onclick = () => {
+                const saved = messageSaver.saveMessages();
+                if (saved) {
+                    showToast('✅ پیام‌ها ذخیره شدند', 'success');
+                    
+                    // نمایش آمار
+                    setTimeout(() => {
+                        messageSaver.showSaveStatus();
+                    }, 1000);
+                }
+            };
+            
+            // اضافه کردن به ابتدای دکمه‌ها
+            buttonContainer.prepend(saveBtn);
+            
+            // اضافه کردن دکمه آمار
+            const statsBtn = document.createElement('button');
+            statsBtn.id = 'messageStatsBtn';
+            statsBtn.className = 'text-sm text-gray-400 hover:text-white flex items-center gap-2';
+            statsBtn.innerHTML = '<i class="fas fa-chart-bar"></i> آمار';
+            statsBtn.title = 'نمایش آمار پیام‌ها';
+            statsBtn.onclick = () => {
+                const stats = messageSaver.getMessageStats();
+                if (stats) {
+                    const message = `
+                        📊 آمار پیام‌ها:
+                        
+                        • کل پیام‌ها: ${stats.total}
+                        • پیام‌های شما: ${stats.userMessages}
+                        • پاسخ‌های هیرو: ${stats.botMessages}
+                        • آخرین ذخیره: ${new Date(stats.lastSave).toLocaleString('fa-IR')}
+                        
+                        پیام‌ها به صورت خودکار ذخیره می‌شوند.
+                    `;
+                    
+                    alert(message.replace(/•/g, '• '));
+                } else {
+                    showToast('📝 هنوز پیامی ذخیره نشده', 'info');
+                }
+            };
+            
+            buttonContainer.prepend(statsBtn);
+        }
+    }
+    
+    // اضافه کردن نشانگر ذخیره خودکار
+    const autoSaveIndicator = document.createElement('div');
+    autoSaveIndicator.id = 'autoSaveIndicator';
+    autoSaveIndicator.className = 'fixed bottom-4 left-4 bg-gray-800 bg-opacity-80 px-3 py-1 rounded-full text-xs text-gray-400 hidden';
+    autoSaveIndicator.innerHTML = '<i class="fas fa-sync-alt animate-spin mr-1"></i> در حال ذخیره...';
+    document.body.appendChild(autoSaveIndicator);
+    
+    // نمایش نشانگر هنگام ذخیره
+    setInterval(() => {
+        if (messageSaver.hasNewMessages()) {
+            autoSaveIndicator.classList.remove('hidden');
+            setTimeout(() => {
+                autoSaveIndicator.classList.add('hidden');
+            }, 1000);
+        }
+    }, 2900); // کمی قبل از ذخیره خودکار
+}
+
+// =========== اضافه کردن استایل‌های لازم ===========
+
+const saveStyles = document.createElement('style');
+saveStyles.textContent = `
+    #autoSaveIndicator {
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(6, 182, 212, 0.3);
+        z-index: 100;
+        animation: fadeIn 0.3s ease-out;
+    }
+    
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* انیمیشن برای پیام‌های جدید */
+    .message-bubble:not(:first-child) {
+        animation: messageSlideIn 0.3s ease-out;
+    }
+    
+    @keyframes messageSlideIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+`;
+document.head.appendChild(saveStyles);
+
+// =========== راه‌اندازی نهایی ===========
+
+document.addEventListener('DOMContentLoaded', function() {
+    // اضافه کردن UI مدیریت ذخیره
+    setTimeout(addSaveManagementUI, 1500);
+    
+    // نمایش وضعیت بعد از بارگذاری
+    setTimeout(() => {
+        messageSaver.showSaveStatus();
+    }, 2000);
+    
+    // نمایش پیام خوش‌آمدگویی در کنسول
+    console.log('💾 سیستم ذخیره پیام فعال است');
+    console.log('📝 پیام‌ها هر ۳ ثانیه ذخیره می‌شوند');
+    console.log('🔄 با رفرش صفحه، پیام‌ها بازیابی می‌شوند');
+});
+
+// =========== توابع عمومی برای دسترسی ===========
+
+window.messageSaver = messageSaver;
+window.saveChatMessages = () => messageSaver.saveMessages();
+window.loadChatMessages = () => messageSaver.loadMessages();
+window.clearSavedMessages = () => messageSaver.clearAllMessages();
+window.getChatStats = () => messageSaver.getMessageStats();
+// =========== سیستم یکپارچه کدهای چیت برای پرامپت هوشمند ===========
+
+// اضافه کردن این بخش به پرامپت اصلی
+const cheatCommandsSystem = `
+
+📜 **سیستم پاسخگویی هوشمند کدهای چیت ماین‌کرافت:**
+
+## **دستورالعمل پاسخگویی به سوالات کدهای چیت:**
+
+### **مراحل پاسخگویی:**
+1. **تشخیص نیاز کاربر:** 
+   - اگر سوال شامل "چیت"، "کد"، "دستور"، "command"، "cheat" باشد
+   - یا کاربر مستقیماً درباره کد سوال کند
+
+2. **پرسیدن اطلاعات لازم:**
+   - "چه نسخه‌ای از بازی را استفاده می‌کنی؟ (Java یا Bedrock)"
+   - "چه چیزی نیاز داری؟ (منبع، ابزار، اثر، ساختمان)"
+
+3. **ارائه کد مناسب:**
+   - ابتدا کد Java را بده
+   - سپس کد Bedrock را بده (اگر کاربر Bedrock است)
+   - با مثال کامل و توضیح هر پارامتر
+
+4. **آموزش استفاده:**
+   - "کلید T را بزن تا چت باز شود"
+   - "کد را کپی کن و در چت پیست کن"
+   - "Enter را بزن"
+
+5. **هشدارهای مهم:**
+   - "در سرورهای عمومی ممکن است فعال نباشد"
+   - "نیاز به OP دارد اگر Survival هستی"
+   - "روی achievements تاثیر می‌گذارد"
+
+### **کتابخانه کدهای پرکاربرد:**
+
+🔧 **دستورات اصلی Give:**
+• Java: /give @p minecraft:[item] [amount]
+• Bedrock: /give @p [item] [amount]
+
+⚡ **آیتم‌های مهم:**
+- diamond (الماس)
+- iron_ingot (شمش آهن) 
+- gold_ingot (شمش طلا)
+- emerald (زمرد)
+- netherite_ingot (شمش ندرایت)
+- diamond_sword (شمشیر الماس)
+- diamond_pickaxe (کلنگ الماس)
+- diamond_axe (تبر الماس)
+- enchanted_golden_apple (سیب طلایی جادویی)
+
+✨ **اثرهای حیاتی:**
+/effect give @p minecraft:speed 300 1       # سرعت ۵ دقیقه
+/effect give @p minecraft:strength 300 1    # قدرت مبارزه
+/effect give @p minecraft:jump_boost 300 2  # پرش بلند
+/effect give @p minecraft:regeneration 300 1 # درمان خودکار
+/effect give @p minecraft:night_vision 600 0 # دید در شب
+/effect give @p minecraft:fire_resistance 600 0 # مقاومت آتش
+/effect give @p minecraft:water_breathing 600 0 # تنفس زیر آب
+/effect give @p minecraft:invisibility 300 0 # نامرئی
+
+⚙️ **دستورات مدیریت بازی:**
+/gamemode creative @p      # حالت خلاقانه
+/gamemode survival @p      # حالت بقا
+/time set day              # روز کردن
+/weather clear             # هوا صاف
+/gamerule keepInventory true # وسایل بعد مرگ
+/difficulty peaceful       # حالت صلح
+
+🏗️ **دستورات ساختمان:**
+/fill 0 64 0 10 70 10 minecraft:diamond_block
+/clone <x1> <y1> <z1> <x2> <y2> <z2> <x> <y> <z>
+/tp @p 100 64 100
+
+### **قالب پاسخ نمونه:**
+
+اگر کاربر بپرسد: "چطوری الماس بگیرم با چیت؟"
+
+**پاسخ تو باید اینگونه باشد:**
+سلام! برای گرفتن الماس با چیت:
+
+1. **Java Edition:**
+\`\`\`
+/give @p minecraft:diamond 64
+\`\`\`
+این کد ۶۴ الماس به نزدیک‌ترین بازیکن می‌دهد.
+
+2. **Bedrock Edition:**
+\`\`\`
+/give @p diamond 64
+\`\`\`
+
+**نحوه استفاده:**
+- کلید \`T\` را بزن (چت باز می‌شود)
+- کد را کپی کن و پیست کن
+- Enter را بزن
+
+**⚠️ توجه:**
+- در حالت Survival نیاز به OP داری
+- در سرورهای عمومی ممکن است غیرفعال باشد
+- روی achievements تاثیر می‌گذارد
+
+چه نسخه‌ای از بازی را استفاده می‌کنی تا کد دقیق‌تری بدهم؟
+
+### **تشخیص خودکار نیازها:**
+
+- اگر کاربر گفت "الماس": کد give diamond
+- اگر کاربر گفت "سرعت": کد effect speed
+- اگر کاربر گفت "حالت خلاق": کد gamemode creative
+- اگر کاربر گفت "وسایل بعد مرگ": کد gamerule keepInventory
+- اگر کاربر گفت "هوا صاف": کد weather clear
+- اگر کاربر گفت "روز": کد time set day
+- اگر کاربر گفت "صلح": کد difficulty peaceful
+- اگر کاربر گفت "درمان": کد effect regeneration
+- اگر کاربر گفت "پرش": کد effect jump_boost
+- اگر کاربر گفت "مقاومت آتش": کد effect fire_resistance
+
+### **پاسخ به سوالات رایج:**
+
+**سوال: "چطوری همه چیز داشته باشم؟"**
+پاسخ: در حالت Creative همه چیز را داری. با \`/gamemode creative @p\`
+
+**سوال: "چطوری هیولاها رو بکشم؟"**
+پاسخ: \`/kill @e[type=!player]\` - همه موجودات غیر بازیکن
+
+**سوال: "چطوری سریع استخراج کنم؟"**
+پاسخ: \`/effect give @p minecraft:haste 600 2\` - سرعت استخراج ۱۰ دقیقه
+
+**سوال: "چطوری زیر آب نفس بکشم؟"**
+پاسخ: \`/effect give @p minecraft:water_breathing 600 0\`
+
+**سوال: "چطوری نامرئی شم؟"**
+پاسخ: \`/effect give @p minecraft:invisibility 300 0\`
+
+**سوال: "چطوری تله‌پورت کنم؟"**
+پاسخ: \`/tp @p 100 64 200\` - به مختصات 100,64,200
+
+### **اشتباهات رایج و راه‌حل:**
+
+1. **"کد کار نمی‌کنه!"**
+   - مطمئن شو در حالت Creative هستی یا OP هستی
+   - از / قبل از کد استفاده کن
+   - اسم آیتم را درست بنویس
+
+2. **"نمی‌تونم چیزی بدم!"**
+   - از @p استفاده کن (نزدیک‌ترین بازیکن)
+   - اسم آیتم را کامل بنویس (مثلاً minecraft:diamond)
+
+3. **"اثر نمی‌مونه!"**
+   - زمان را بیشتر کن (مثلاً 600 به جای 60)
+   - سطح را تنظیم کن (1 برای سطح 2)
+
+### **نکات فنی:**
+
+1. **در Java Edition:**
+   - آیتم‌ها با minecraft: شروع می‌شوند
+   - حروف کوچک و با underline جدا می‌شوند
+   - مثال: minecraft:diamond_sword
+
+2. **در Bedrock Edition:**
+   - آیتم‌ها ساده‌تر هستند
+   - مثال: diamond یا iron_ingot
+   - اعداد برای حالت بازی: 0=Survival, 1=Creative, 2=Adventure
+
+3. **Selectorها:**
+   - @p = نزدیک‌ترین بازیکن
+   - @a = همه بازیکنان
+   - @e = همه موجودات
+   - @s = خودت
+
+### **مثال پاسخ کامل:**
+
+**سوال کاربر:** "چطوری شمشیر الماس با انچنت بگیرم؟"
+
+**پاسخ تو:**
+برای گرفتن شمشیر الماس انچنت شده:
+
+\`\`\`java
+Java Edition:
+/give @p minecraft:diamond_sword{Enchantments:[{id:"minecraft:sharpness",lvl:5},{id:"minecraft:knockback",lvl:2},{id:"minecraft:fire_aspect",lvl:2},{id:"minecraft:looting",lvl:3},{id:"minecraft:mending",lvl:1},{id:"minecraft:unbreaking",lvl:3}]} 1
+\`\`\`
+
+این شمشیر شامل:
+- تیزی سطح 5
+- پس‌زدن سطح 2
+- آتش سطح 2
+- غارت سطح 3
+- تعمیر خودکار
+- دوام سطح 3
+
+**نحوه استفاده:**
+1. کلید \`T\` را بزن
+2. کد را کپی و پیست کن
+3. Enter را بزن
+
+آیا نسخه Bedrock استفاده می‌کنی تا کد مخصوص آن را بدهم؟
+`;
+
+// =========== اضافه کردن به پرامپت اصلی ===========
+
+// اگر پرامپت اصلی وجود دارد، این بخش را به آن اضافه کن
+if (typeof window.minecraftExpertPrompt !== 'undefined') {
+    window.minecraftExpertPrompt = window.minecraftExpertPrompt + '\n\n' + cheatCommandsSystem;
+} else {
+    // یا به صورت جداگانه ذخیره کن
+    window.cheatCommandsPrompt = cheatCommandsSystem;
+}
+
+// =========== سیستم تشخیص و پاسخ خودکار ===========
+
+class CheatCommandResponder {
+    constructor() {
+        this.keywords = {
+            cheat: ['چیت', 'کد', 'دستور', 'command', 'کنسول', 'cheat', 'کد بازی'],
+            items: ['الماس', 'آهن', 'طلا', 'زمرد', 'ندرایت', 'diamond', 'iron', 'gold'],
+            effects: ['سرعت', 'قدرت', 'درمان', 'پرش', 'مقاومت', 'speed', 'strength', 'regeneration'],
+            game: ['حالت', 'زمان', 'هوا', 'سختی', 'gamemode', 'time', 'weather'],
+            building: ['ساختن', 'پر کردن', 'کپی', 'تله‌پورت', 'fill', 'clone', 'tp']
+        };
+    }
+    
+    detectCheatRequest(message) {
+        const lowerMessage = message.toLowerCase();
+        
+        for (const [category, words] of Object.entries(this.keywords)) {
+            for (const word of words) {
+                if (lowerMessage.includes(word.toLowerCase())) {
+                    return category;
+                }
+            }
+        }
+        
+        return null;
+    }
+    
+    getResponseTemplate(category) {
+        const templates = {
+            cheat: "برای کدهای چیت، لطفاً مشخص کن:\n1. چه نسخه‌ای؟ (Java/Bedrock)\n2. دقیقاً چه چیزی نیاز داری؟",
+            items: "برای گرفتن آیتم:\nJava: `/give @p minecraft:[نام آیتم] [تعداد]`\nمثال: `/give @p minecraft:diamond 64`",
+            effects: "برای اثرهای ویژه:\n`/effect give @p minecraft:[نام اثر] [زمان] [سطح]`\nمثال: `/effect give @p minecraft:speed 300 1`",
+            game: "برای تنظیمات بازی:\nحالت: `/gamemode creative @p`\nزمان: `/time set day`\nهوا: `/weather clear`",
+            building: "برای ساختمان:\nپر کردن: `/fill 0 64 0 10 70 10 minecraft:diamond_block`\nتله‌پورت: `/tp @p 100 64 100`"
+        };
+        
+        return templates[category] || "در مورد کدهای چیت سوالی داری؟";
+    }
+}
+
+// راه‌اندازی سیستم
+const cheatResponder = new CheatCommandResponder();
+
+console.log('✅ سیستم کدهای چیت برای پرامپت آماده است');
+    </script>
+</body>
+</html>
